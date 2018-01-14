@@ -1,0 +1,6 @@
+MySQL-python
+PyYAML
+Twisted==10.2.0
+pyOpenSSL
+pycrypto
+zope.interface

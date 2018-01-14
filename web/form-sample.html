@@ -1,0 +1,46 @@
+<html>
+<head><title>FiveServer Registration Form</title></head>
+<script src="/md5.js" type="text/javascript"></script>
+<script>
+function makeHash() {
+    a = document.getElementById('serial').value;
+    a = a.replace(/^\s+/,'').replace(/\s+$/,'').replace(/-/g,'').toUpperCase();
+    if (!a.match(/^[A-Z0-9]{20}$/)) {
+        alert('The serial number appears to be invalid. Please enter a good one');
+        return false;
+    }
+    document.getElementById('serial').value = a;
+    while(a.length<36) { a += '\0'; }
+    u = document.getElementById('username').value;
+    u = u.replace(/^\s+/,'').replace(/\s+$/,'');
+    if (u.length<3 || !u.match(/^[0-9a-zA-Z]+$/)) {
+        alert('Invalid username. Must be 3+ characters long and contain only letters and digits');
+        return false;
+    }
+    p = document.getElementById('password').value;
+    if (p.length<3) {
+        alert('Password too short. Must be 3+ characters long');
+        return false;
+    }
+    document.getElementById('hash').value = hex_md5(a+u+'-'+p);
+    return true;
+} 
+</script>
+<h3>FiveServer Registration Form</h3>
+<div class="FormBody">
+<form name="registration" action="/register" method="POST">
+<input type="hidden" name="nonce" id="nonce" value="%(nonce)s"/>
+<input type="hidden" name="hash" id="hash" size="32" value=""/>
+<strong>Serial:</strong><br />
+<input type="text" name="serial" id="serial" size="40" value="%(serial)s" onkeydown="if (event.keyCode == 13) {document.getElementById('btnGen').click(); return false;}" /><br />
+<br />
+<strong>Username:</strong><br />
+<input type="text" name="user" id="username" size="40" value="%(username)s" onkeydown="if (event.keyCode == 13) {document.getElementById('btnGen').click(); return false;}" /><br />
+</form>
+<strong>Password:</strong><br />
+<input type="password" id="password" size="40" value="" onkeydown="if (event.keyCode == 13) {document.getElementById('btnGen').click(); return false;}" /><br />
+<p>
+<input class="button" type="button" id="btnGen" value="Register" onclick="if (makeHash()) {document.forms['registration'].submit();}" />
+</p>
+</div>
+</html>
