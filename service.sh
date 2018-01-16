@@ -1,21 +1,22 @@
-#!/bin/sh
-export FSENV=$HOME/fsenv
-export PYTHONPATH=./lib:$PYTHONPATH
+#!/usr/bin/env bash
+fsroot=${FSROOT:-.}
+export FSENV=${FSENV:-$HOME/fsenv}
+export PYTHONPATH=${fsroot}/lib:$PYTHONPATH
 
 RETVAL=0
 
 case "$1" in
     fiveserver)
         PROG=fiveserver
-        TAC=./etc/fiveserver.tac
-        LOG=./log/fiveserver.log
-        PID=./fiveserver.pid
+        TAC=${fsroot}/etc/fiveserver.tac
+        LOG=${fsroot}/log/fiveserver.log
+        PID=${fsroot}/fiveserver.pid
         ;;
     sixserver)
         PROG=sixserver
-        TAC=./etc/sixserver.tac
-        LOG=./log/sixserver.log
-        PID=./sixserver.pid
+        TAC=${fsroot}/etc/sixserver.tac
+        LOG=${fsroot}/log/sixserver.log
+        PID=${fsroot}/sixserver.pid
         ;;
     *)
         echo "Usage $0 {fiveserver|sixserver} {run|start|stop|status}"
@@ -27,8 +28,11 @@ case "$2" in
     run)
         ${FSENV}/bin/twistd -noy $TAC
         ;;
+    runexec)
+        exec ${FSENV}/bin/twistd -noy $TAC --logfile $LOG --pidfile $PID
+        ;;
     start)
-        ${FSENV}/bin/twistd -ny $TAC --logfile $LOG --pidfile $PID &
+        ${FSENV}/bin/twistd -y $TAC --logfile $LOG --pidfile $PID
         ;;
     stop)
         cat $PID | xargs kill

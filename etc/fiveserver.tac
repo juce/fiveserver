@@ -16,11 +16,13 @@ from fiveserver.protocol import pes5, pes6
 from fiveserver.register import RegistrationResource
 from fiveserver import storagecontroller, log
 from fiveserver import admin, data, logic
+import os
 
 
 application = Application("Fiveserver application")
+fsroot = os.environ.get('FSROOT','.')
 
-scfg = YamlConfig('./etc/conf/fiveserver.yaml')
+scfg = YamlConfig(fsroot + '/etc/conf/fiveserver.yaml')
 log.setDebug(scfg.Debug)
 dbConfig = DatabaseConfig(**scfg.DB)
 storageController = storagecontroller.StorageController(
@@ -63,7 +65,7 @@ for protocol,port in [
 
 # registration web-service
 registrationServer = Site(
-    RegistrationResource(config,'./web'))
+    RegistrationResource(config,fsroot + '/web'))
 service = TCPServer(scfg.WebInterface['port'], registrationServer, interface=config.interface)
 service.setServiceParent(application)
 
@@ -72,12 +74,12 @@ class ServerContextFactory:
         from OpenSSL import SSL
         ctx = SSL.Context(SSL.SSLv23_METHOD)
         ctx.use_privatekey_file(
-            '%s/serverkey.pem' % adminConfig.KeysDirectory)
+            fsroot + '/%s/serverkey.pem' % adminConfig.KeysDirectory)
         ctx.use_certificate_file(
-            '%s/servercert.pem' % adminConfig.KeysDirectory)
+            fsroot + '/%s/servercert.pem' % adminConfig.KeysDirectory)
         return ctx
 
-adminConfig = YamlConfig('./etc/conf/admin.yaml')
+adminConfig = YamlConfig(fsroot + '/etc/conf/admin.yaml')
 
 # server admin web-service (HTTPS, authentication)
 adminRoot = admin.AdminRootResource(adminConfig, config)

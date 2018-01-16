@@ -20,7 +20,9 @@ except ImportError:
 XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="/xsl/style.xsl"?>
 """
-XSL_FILE="""%(XslFile)s"""
+
+fsroot = os.environ.get('FSROOT','.')
+XSL_FILE=fsroot+"""/%(XslFile)s"""
 
 
 class XslResource(resource.Resource):
@@ -468,7 +470,7 @@ class LogResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/plain')
-        logFile = self.adminConfig.FiveserverLogFile
+        logFile = fsroot + "/" + self.adminConfig.FiveserverLogFile
         if os.path.exists(logFile):
             logFile = open(logFile)
             logLines = logFile.readlines()
