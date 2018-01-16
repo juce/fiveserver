@@ -10,13 +10,13 @@ case "$1" in
         PROG=fiveserver
         TAC=${fsroot}/etc/fiveserver.tac
         LOG=${fsroot}/log/fiveserver.log
-        PID=${fsroot}/fiveserver.pid
+        PID=${fsroot}/log/fiveserver.pid
         ;;
     sixserver)
         PROG=sixserver
         TAC=${fsroot}/etc/sixserver.tac
         LOG=${fsroot}/log/sixserver.log
-        PID=${fsroot}/sixserver.pid
+        PID=${fsroot}/log/sixserver.pid
         ;;
     *)
         echo "Usage $0 {fiveserver|sixserver} {run|start|stop|status}"
