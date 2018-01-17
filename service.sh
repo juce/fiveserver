@@ -8,13 +8,13 @@ RETVAL=0
 case "$1" in
     fiveserver)
         PROG=fiveserver
-        TAC=${fsroot}/etc/fiveserver.tac
+        TAC=${fsroot}/tac/fiveserver.tac
         LOG=${fsroot}/log/fiveserver.log
         PID=${fsroot}/log/fiveserver.pid
         ;;
     sixserver)
         PROG=sixserver
-        TAC=${fsroot}/etc/sixserver.tac
+        TAC=${fsroot}/tac/sixserver.tac
         LOG=${fsroot}/log/sixserver.log
         PID=${fsroot}/log/sixserver.pid
         ;;

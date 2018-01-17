@@ -25,6 +25,7 @@ COPY etc $FSROOT/etc
 COPY lib $FSROOT/lib
 COPY log $FSROOT/log
 COPY sql $FSROOT/sql
+COPY tac $FSROOT/tac
 COPY web $FSROOT/web
 COPY web6 $FSROOT/web6
 COPY service.sh $FSROOT/
