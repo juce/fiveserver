@@ -54,7 +54,7 @@ DB:
         maxConnections: 5
         keepAliveInterval: 60
 
-BannedList: banned.yaml
+BannedList: ./etc/data/banned.yaml
 
 Roster:
     enforceHash: false

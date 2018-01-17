@@ -8,6 +8,7 @@
 
 [ -d /opt/fiveserver/etc ] || ( mkdir -p /opt/fiveserver && cp -r ./etc /opt/fiveserver/ )
 [ -d /opt/fiveserver/log ] || ( mkdir -p /opt/fiveserver/log && chown five:five /opt/fiveserver/log )
+[ -d /opt/fiveserver/etc/data ] || ( mkdir /opt/fiveserver/etc/data && chown five:five /opt/fiveserver/etc/data )
 
 tag="v0.4.11"
 

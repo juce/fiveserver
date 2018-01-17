@@ -236,8 +236,10 @@ class FiveServerConfig:
         self._latestUserInfo = dict()
 
         # read banned-list, if available
-        dirName, fileName = os.path.split(self.serverConfig._yamlFile)
-        bannedYaml = '%s/%s' % (dirName, self.serverConfig.BannedList)
+        bannedYaml = self.serverConfig.BannedList
+        if not bannedYaml.startswith('/'):
+            fsroot = os.environ.get('FSROOT','.')
+            bannedYaml = fsroot + '/' + bannedYaml
         if os.path.exists(bannedYaml):
             self.bannedList = YamlConfig(bannedYaml)
         else:
