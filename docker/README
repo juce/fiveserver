@@ -26,7 +26,7 @@ it possible to modify config, rotate the logs, etc.
 To prepare the configuration and log directory, run:
 
 mkdir /opt/five
-docker run --rm -v /opt/five:/tmp fiveserver /opt/fiveserver/docker-prep.sh
+docker run --rm -v /opt/five:/tmp --user=root fiveserver /opt/fiveserver/docker-prep.sh
 
 Now you should see default configuration files in /opt/five/etc/conf
 The log dir (with correct user permissions) is /opt/five/log
