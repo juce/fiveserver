@@ -19,7 +19,6 @@ ENV SVC fiveserver
 RUN mkdir -p $FSROOT
 COPY pip.requirements Makefile $FSROOT/
 RUN cd $FSROOT && make FSENV=$FSENV install
-RUN mkdir -p $FSROOT/log && chown five:five $FSROOT/log
 
 COPY etc $FSROOT/etc
 COPY lib $FSROOT/lib
@@ -30,6 +29,9 @@ COPY web $FSROOT/web
 COPY web6 $FSROOT/web6
 COPY docker $FSROOT/docker
 COPY service.sh $FSROOT/
+
+RUN chown -R five:five $FSROOT/log
+RUN chown -R five:five $FSROOT/etc/data
 
 USER five
 WORKDIR $FSROOT
