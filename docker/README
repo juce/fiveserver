@@ -1,0 +1,45 @@
+Fiveserver in Docker
+====================
+
+
+Build
+~~~~~
+
+To build the docker image, run:
+
+make
+
+
+Prep
+~~~~
+
+Fiveserver and Sixserver run in containers under non-privileged user,
+called "five", with pre-defined uid=3066 and gid=3066. Although it is
+not strictly necessary, to make things sane, you should create a group
+and a user with such ids:
+
+groupadd -g 3066 five && useradd -u 3066 -g five five 
+
+In most cases you would want to have your configuration
+and the logs outside of the docker containers. This makes
+it possible to modify config, rotate the logs, etc.
+To prepare the configuration and log directory, run:
+
+mkdir /opt/five
+docker run --rm -v /opt/five:/tmp fiveserver /opt/fiveserver/docker-prep.sh
+
+Now you should see default configuration files in /opt/five/etc/conf
+The log dir (with correct user permissions) is /opt/five/log
+
+
+Run
+~~~
+
+To create and start new containers:
+
+Fiveserver:
+docker run -d --net=host --name=fiveserver --restart=always -v /opt/five/etc:/opt/fiveserver/etc -v /opt/five/log:/opt/fiveserver/log -e SVC=fiveserver fiveserver
+
+Sixserver:
+docker run -d --net=host --name=sixserver --restart=always -v /opt/five/etc:/opt/fiveserver/etc -v /opt/five/log:/opt/fiveserver/log -e SVC=sixserver fiveserver
+

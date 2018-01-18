@@ -29,6 +29,7 @@ COPY tac $FSROOT/tac
 COPY web $FSROOT/web
 COPY web6 $FSROOT/web6
 COPY service.sh $FSROOT/
+COPY docker-prep.sh $FSROOT/
 
 USER five
 CMD exec $FSROOT/service.sh $SVC runexec
