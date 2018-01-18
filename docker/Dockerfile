@@ -28,8 +28,8 @@ COPY sql $FSROOT/sql
 COPY tac $FSROOT/tac
 COPY web $FSROOT/web
 COPY web6 $FSROOT/web6
+COPY docker $FSROOT/docker
 COPY service.sh $FSROOT/
-COPY docker-prep.sh $FSROOT/
 
 USER five
 WORKDIR $FSROOT
