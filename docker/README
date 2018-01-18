@@ -7,7 +7,7 @@ Build
 
 To build the docker image, run:
 
-make
+docker build -f Dockerfile -t fiveserver ..
 
 
 Prep
@@ -21,15 +21,18 @@ and a user with such ids:
 groupadd -g 3066 five && useradd -u 3066 -g five five 
 
 In most cases you would want to have your configuration
-and the logs outside of the docker containers. This makes
-it possible to modify config, rotate the logs, etc.
-To prepare the configuration and log directory, run:
+and the logs outside of the docker containers. Choose a directory where
+you want to have conf and logs and copy the default configuration
+there, then set correct ownership of the files.
+For example, you want the root dir to be "/opt/five". Then:
 
 mkdir /opt/five
-docker run --rm -v /opt/five:/tmp -e dir=/tmp --user=root fiveserver /opt/fiveserver/docker/prep.sh
+cp -r ../etc ../log /opt/five/
+chown -R five:five /opt/five/log
+chown -R five:five /opt/five/etc/data
 
-Now you should see default configuration files in /opt/five/etc/conf
-The log dir (with correct user permissions) is /opt/five/log
+Modify configuration as desired. At the minimum, you should change
+the admin usernames/passwords in etc/conf/admin.yaml and etc/conf/admin6.yaml
 
 
 Run
@@ -37,9 +40,6 @@ Run
 
 To create and start new containers:
 
-Fiveserver:
 docker run -d --net=host --name=fiveserver --restart=always -v /opt/five/etc:/opt/fiveserver/etc -v /opt/five/log:/opt/fiveserver/log -e SVC=fiveserver fiveserver
-
-Sixserver:
 docker run -d --net=host --name=sixserver --restart=always -v /opt/five/etc:/opt/fiveserver/etc -v /opt/five/log:/opt/fiveserver/log -e SVC=sixserver fiveserver
 
