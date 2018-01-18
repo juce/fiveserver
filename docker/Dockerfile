@@ -32,4 +32,5 @@ COPY service.sh $FSROOT/
 COPY docker-prep.sh $FSROOT/
 
 USER five
+WORKDIR $FSROOT
 CMD exec $FSROOT/service.sh $SVC runexec
