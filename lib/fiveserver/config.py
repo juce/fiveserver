@@ -340,7 +340,6 @@ class FiveServerConfig:
                     break
             if not goodSpec:
                 continue
-            print(quads)
             netBuf = b''.join(struct.pack('!B', quad) for quad in quads)
             net = struct.unpack('!I',netBuf)[0]
             if bits == 0:
