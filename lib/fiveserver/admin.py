@@ -2,7 +2,7 @@ from twisted.web import static, server, resource
 from twisted.internet import reactor, defer
 from twisted.words.xish import domish
 from xml.sax.saxutils import escape
-import log
+from fiveserver import log
 from fiveserver.model.lobby import MatchState, Match, Match6
 from fiveserver.model import util
 
@@ -14,7 +14,10 @@ from datetime import datetime
 
 try: import psutil
 except ImportError:
-    import commands
+    try:
+        import commands
+    except ImportError:
+        import subprocess as commands
 
 
 XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
@@ -32,7 +35,7 @@ class XslResource(resource.Resource):
         resource.Resource.__init__(self)
         self.xsl = open(XSL_FILE % dict(adminConfig)).read()
         self.lastModified = datetime.utcnow()
-        self.etag = hashlib.md5(self.xsl).hexdigest()
+        self.etag = hashlib.md5(self.xsl.encode('utf-8')).hexdigest()
 
     def _sameContent(self, request):
         etag = request.received_headers.get('If-None-Match')
@@ -243,7 +246,8 @@ class ProfilesResource(BaseXmlResource):
 
         else:
             # specific profile
-            def _renderProfileInfo((profile, stats)):
+            def _renderProfileInfo(x):
+                profile, stats = x
                 root = domish.Element((None, 'profile'))
                 root['href'] = '/profiles'
                 root['name'] = util.toUnicode(profile.name)
@@ -639,7 +643,7 @@ You can either use specific IP or a network, with or without mask
                     self.config.bannedList.save()
                     self.config.makeFastBannedList()
             return '%s<actionAccepted href="/banned" />' % XML_HEADER
-        except Exception, info:
+        except Exception as info:
             request.setResponseCode(500)
             log.msg('SERVER ERROR: %s' % info)
             return '%s<error text="server error"/>' % XML_HEADER
@@ -673,7 +677,7 @@ class BanRemoveResource(BaseXmlResource):
                 self.config.bannedList.save()
                 self.config.makeFastBannedList()
             return '%s<actionAccepted href="/banned" />' % XML_HEADER
-        except Exception, info:
+        except Exception as info:
             request.setResponseCode(500)
             log.msg('SERVER ERROR: %s' % info)
             return '%s<error text="server error"/>' % XML_HEADER

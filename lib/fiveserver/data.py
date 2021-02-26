@@ -4,7 +4,7 @@ Data-layer
 
 from twisted.internet import defer
 from datetime import timedelta
-from model import user
+from fiveserver.model import user
 
 
 class UserData:

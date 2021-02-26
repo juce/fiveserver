@@ -7,8 +7,7 @@ import struct
 import random
 
 from fiveserver import log
-import util
-import user
+from fiveserver.model import util, user
 
 
 MAX_MESSAGES = 50

@@ -4,8 +4,8 @@ Data-layer for PES6
 
 from twisted.internet import defer
 from datetime import timedelta
-from model import user
-import data
+from fiveserver.model import user
+from fiveserver import data
 
 
 class UserData(data.UserData):

@@ -12,11 +12,8 @@ import random
 import struct
 import socket
 
-from model import lobby, user
-import storagecontroller
-import errors
-import rating
-import log
+from fiveserver.model import lobby, user
+from fiveserver import storagecontroller, errors, rating, log
 import yaml
 import os
 
@@ -27,7 +24,7 @@ class YamlConfig:
         if yamlFile is not None:
             self._yamlFile = yamlFile
             inf = open(yamlFile)
-            cfg = yaml.load(inf.read())
+            cfg = yaml.load(inf.read(), Loader=yaml.SafeLoader)
             inf.close()
             if cfg is not None:
                 self._cfg.update(cfg)
@@ -37,11 +34,11 @@ class YamlConfig:
             raise Exception(
                 'Need at least one of yamlFile, newYamlFile '
                 'keyword parameters')
-        for k, v in self._cfg.iteritems():
+        for k, v in self._cfg.items():
             setattr(self, k, v)
 
     def __iter__(self):
-        for pair in self.__dict__.iteritems():
+        for pair in self.__dict__.items():
             yield pair
 
     def __setattr__(self, name, value):
@@ -265,7 +262,7 @@ class FiveServerConfig:
         message = 'Date: %s %s' % (
             time.ctime(), time.tzname[time.localtime().tm_isdst])
         for aLobby in self.lobbies:
-            try: player = aLobby.players.itervalues().next()
+            try: player = next(iter(aLobby.players.values()))
             except StopIteration: 
                 aLobby.addToChatHistory(
                     lobby.ChatMessage(
@@ -372,7 +369,7 @@ class FiveServerConfig:
             self.serverConfig.ServerIP = None
         if self.serverConfig.ServerIP in [None,'auto']:
             # try to determine the WAN address
-            d = client.getPage(self.ipDetectUri, timeout=10)
+            d = client.getPage(self.ipDetectUri.encode('utf-8'), timeout=10)
         else:
             # explicitly set in configuration file
             d = defer.succeed(self.serverConfig.ServerIP)

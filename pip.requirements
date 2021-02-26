@@ -1,6 +1,6 @@
-MySQL-python
+mysqlclient
 PyYAML
-Twisted==10.2.0
+Twisted
 pyOpenSSL
 pycrypto
 zope.interface

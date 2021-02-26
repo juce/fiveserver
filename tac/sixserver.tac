@@ -41,7 +41,7 @@ profileLogic = logic.ProfileLogic(matchData, profileData)
 config = FiveServerConfig(
     scfg, dbConfig, userData, profileData, matchData, profileLogic)
 
-for gameName,port in scfg.GamePorts.iteritems():
+for gameName,port in scfg.GamePorts.items():
     factory = PacketServiceFactory(config)
     factory.protocol = pes6.NewsProtocol
     if hasattr(scfg, 'Greeting'):

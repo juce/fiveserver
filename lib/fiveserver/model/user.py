@@ -5,7 +5,7 @@ User-related data
 from datetime import timedelta
 import struct
 from fiveserver import log
-import util
+from fiveserver.model import util
 
 
 class Profile:

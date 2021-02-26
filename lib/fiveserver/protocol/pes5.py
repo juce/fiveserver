@@ -232,7 +232,7 @@ class LoginService(PacketDispatcher):
                     'Disconnecting.' % (
                         self._user.hash, self._user.username))
                 self.sendData(0x3004,struct.pack('!I',0xffffff12))
-        except errors.UnknownUserError, info:
+        except errors.UnknownUserError as info:
             # authentication error
             log.msg('UnknownUserError: %s' % info)
             self.sendData(0x3004,struct.pack('!I',0xffffff10))
