@@ -43,11 +43,11 @@ class Lobby:
         self.roomOrdinal = 0
         self.chatHistory = list()
 
-    def __str__(self):
+    def __bytes__(self):
         """
         return serialized representation to be used in packets
         """
-        return '%s%s%s' % (
+        return b'%s%s%s' % (
                 struct.pack('!B',self.typeCode),
                 util.padWithZeros(self.name,32),
                 struct.pack('!H',len(self.players)))
@@ -248,7 +248,7 @@ class Room:
     def isAtPregameSettings(self, room):
         return RoomState.ROOM_IDLE < room.phase < RoomState.ROOM_MATCH_STARTED
     
-    def __str__(self):
+    def __repr__(self):
         return 'Room(id=%d, name="%s", players=%d)' % (
                 self.id, self.name, len(self.players))
 

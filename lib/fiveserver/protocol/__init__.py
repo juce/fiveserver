@@ -63,7 +63,7 @@ class PacketReceiver(Protocol):
                 username = ''
             log.debug('[SEND {%s}]: %s' % (
                 username, PacketFormatter.format(pkt)))
-        self.transport.write(stream.xorData(str(pkt),0))
+        self.transport.write(stream.xorData(bytes(pkt),0))
         self._count += 1
 
     def sleep(self, result, seconds):

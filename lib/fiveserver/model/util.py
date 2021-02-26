@@ -7,7 +7,7 @@ import re
 
 
 def stripZeros(s):
-    izero = s.find('\0')
+    izero = s.find(b'\0')
     if izero >= 0:
         return s[:izero]
     return s
@@ -16,8 +16,8 @@ def stripZeros(s):
 def padWithZeros(s, total):
     if isinstance(s, str):
         s = s.encode('utf-8', 'replace')
-    ns = str(s[:total])
-    ns += '\0'*(total-len(ns))
+    ns = s[:total]
+    ns += b'\0'*(total-len(ns))
     return ns
 
 
