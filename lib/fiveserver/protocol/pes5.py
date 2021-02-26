@@ -693,7 +693,7 @@ class NetworkMenuService(LoginService):
                     special,
                     struct.pack('!i', chatMessage.fromProfile.id),
                     util.padWithZeros(chatMessage.fromProfile.name,16),
-                    chatMessage.text.encode('utf-8')[:126]+'\0\0')
+                    chatMessage.text.encode('utf-8')[:126]+b'\0\0')
             who.sendData(0x4402, data)
 
     def broadcastSystemChat(self, aLobby, text):
@@ -704,7 +704,7 @@ class NetworkMenuService(LoginService):
                     b'\0\0\0\0',
                     struct.pack('!i', chatMessage.fromProfile.id),
                     util.padWithZeros(chatMessage.fromProfile.name,16),
-                    chatMessage.text.encode('utf-8')[:126]+'\0\0')
+                    chatMessage.text.encode('utf-8')[:126]+b'\0\0')
             usr.sendData(0x4402, data)
         aLobby.addToChatHistory(chatMessage)
 
@@ -1024,21 +1024,21 @@ class MainService(NetworkMenuService):
                 struct.pack('!i',self._user.profile.id),
                 util.padWithZeros(self._user.profile.name,16),
                 #util.padWithZeros(message, 128))
-                message[:126]+'\0\0')
-        if chatType=='\x00' and pkt.data[1]=='\x01':
+                message[:126]+b'\0\0')
+        if chatType==b'\x00' and pkt.data[1]==b'\x01':
             # add to lobby chat history
             thisLobby.addToChatHistory(
                 lobby.ChatMessage(self._user.profile, message))
             # lobby chat
             for usr in thisLobby.players.itervalues():
                 usr.sendData(0x4402, data)
-        elif chatType=='\x01' and pkt.data[1]=='\x02':
+        elif chatType==b'\x01' and pkt.data[1]==b'\x02':
             # room chat
             room = self._user.state.room
             if room:
                 for usr in room.players:
                     usr.sendData(0x4402, data)
-        elif chatType=='\x00' and pkt.data[1]=='\x02':
+        elif chatType==b'\x00' and pkt.data[1]==b'\x02':
             # private message
             profileId = struct.unpack('!i',pkt.data[6:10])[0]
             usr = thisLobby.getPlayerByProfileId(profileId)
