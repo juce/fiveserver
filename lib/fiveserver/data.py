@@ -228,9 +228,9 @@ class ProfileData:
                'fav_player=%s, fav_team=%s, rank=%s, '
                'points=%s, disconnects=%s, seconds_played=%s')
         params = (p.id, p.userId, p.index, p.name, p.favPlayer, p.favTeam,
-                  p.rank, p.points, p.disconnects, p.playTime.seconds,
+                  p.rank, p.points, p.disconnects, p.playTime.total_seconds(),
                   p.userId, p.index, p.name, p.favPlayer, p.favTeam, p.rank,
-                  p.points, p.disconnects, p.playTime.seconds)
+                  p.points, p.disconnects, p.playTime.total_seconds())
         yield self.dbController.dbWrite(0, sql, *params)
         defer.returnValue(True)
 
