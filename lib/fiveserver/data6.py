@@ -24,7 +24,7 @@ class ProfileData(data.ProfileData):
 
     @defer.inlineCallbacks
     def get(self, id):
-        sql = ('SELECT id,user_id,ordinal,name,rank,'
+        sql = ('SELECT id,user_id,ordinal,name,`rank`,'
                'rating,points,disconnects,updated_on,seconds_played,comment '
                'FROM profiles WHERE deleted = 0 AND id = %s')
         rows = yield self.dbController.dbRead(0, sql, id)
@@ -49,7 +49,7 @@ class ProfileData(data.ProfileData):
 
     @defer.inlineCallbacks
     def getByUserId(self, userId):
-        sql = ('SELECT id,user_id,ordinal,name,rank,'
+        sql = ('SELECT id,user_id,ordinal,name,`rank`,'
                'rating,points,disconnects,updated_on,seconds_played,comment '
                'FROM profiles WHERE deleted = 0 AND user_id = %s '
                'ORDER BY updated_on ASC')
@@ -79,7 +79,7 @@ class ProfileData(data.ProfileData):
                'FROM profiles WHERE deleted = 0')
         rows = yield self.dbController.dbRead(0, sql)
         total = int(rows[0][0])
-        sql = ('SELECT id,user_id,ordinal,name,rank,'
+        sql = ('SELECT id,user_id,ordinal,name,`rank`,'
                'rating,points,disconnects,updated_on,seconds_played,comment '
                'FROM profiles WHERE deleted = 0 '
                'ORDER BY name LIMIT %s OFFSET %s')
@@ -106,11 +106,11 @@ class ProfileData(data.ProfileData):
     @defer.inlineCallbacks
     def store(self, p):
         sql = ('INSERT INTO profiles (id,user_id,ordinal,name,'
-               'rank,rating,points,disconnects,seconds_played,comment) '
+               '`rank`,rating,points,disconnects,seconds_played,comment) '
                'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) '
                'ON DUPLICATE KEY UPDATE '
                'deleted=0, user_id=%s, ordinal=%s, name=%s, '
-               'rank=%s, rating=%s, points=%s, '
+               '`rank`=%s, rating=%s, points=%s, '
                'disconnects=%s, seconds_played=%s, comment=%s')
         params = (p.id, p.userId, p.index, p.name, 
                   p.rank, p.rating, p.points, p.disconnects, p.playTime.total_seconds(),
@@ -123,7 +123,7 @@ class ProfileData(data.ProfileData):
     @defer.inlineCallbacks
     def findByName(self, profileName):
         sql = ('SELECT id,user_id,ordinal,name, '
-               'rank,rating,points,disconnects,updated_on,'
+               '`rank`,rating,points,disconnects,updated_on,'
                'seconds_played,comment '
                'FROM profiles WHERE deleted = 0 AND name = %s')
         rows = yield self.dbController.dbRead(0, sql, profileName)

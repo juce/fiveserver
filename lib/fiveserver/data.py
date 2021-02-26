@@ -128,7 +128,7 @@ class ProfileData:
 
     @defer.inlineCallbacks
     def get(self, id):
-        sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,rank,'
+        sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,`rank`,'
                'points,disconnects,updated_on,seconds_played '
                'FROM profiles WHERE deleted = 0 AND id = %s')
         rows = yield self.dbController.dbRead(0, sql, id)
@@ -150,7 +150,7 @@ class ProfileData:
 
     @defer.inlineCallbacks
     def getByUserId(self, userId):
-        sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,rank,'
+        sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,`rank`,'
                'points,disconnects,updated_on,seconds_played '
                'FROM profiles WHERE deleted = 0 AND user_id = %s '
                'ORDER BY updated_on ASC')
@@ -198,7 +198,7 @@ class ProfileData:
                'FROM profiles WHERE deleted = 0')
         rows = yield self.dbController.dbRead(0, sql)
         total = int(rows[0][0])
-        sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,rank,'
+        sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,`rank`,'
                'points,disconnects,updated_on,seconds_played '
                'FROM profiles WHERE deleted = 0 '
                'ORDER BY name LIMIT %s OFFSET %s')
@@ -222,10 +222,10 @@ class ProfileData:
     @defer.inlineCallbacks
     def store(self, p):
         sql = ('INSERT INTO profiles (id,user_id,ordinal,name,fav_player,'
-               'fav_team,rank,points,disconnects,seconds_played) '
+               'fav_team,`rank`,points,disconnects,seconds_played) '
                'VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s) ON DUPLICATE KEY UPDATE '
                'deleted=0, user_id=%s, ordinal=%s, name=%s, '
-               'fav_player=%s, fav_team=%s, rank=%s, '
+               'fav_player=%s, fav_team=%s, `rank`=%s, '
                'points=%s, disconnects=%s, seconds_played=%s')
         params = (p.id, p.userId, p.index, p.name, p.favPlayer, p.favTeam,
                   p.rank, p.points, p.disconnects, p.playTime.total_seconds(),
@@ -244,7 +244,7 @@ class ProfileData:
     @defer.inlineCallbacks
     def findByName(self, profileName):
         sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,'
-               'rank,points,disconnects,updated_on,seconds_played '
+               '`rank`,points,disconnects,updated_on,seconds_played '
                'FROM profiles WHERE deleted = 0 AND name = %s')
         rows = yield self.dbController.dbRead(0, sql, profileName)
         results = []
@@ -285,7 +285,7 @@ class ProfileData:
                     # check if rank needs to be lowered
                     if last_points > points:
                         rank = count
-                sql = ('UPDATE profiles SET rank=%s WHERE id=%s')
+                sql = ('UPDATE profiles SET `rank`=%s WHERE id=%s')
                 params = [rank, id]
                 transaction.execute(sql, params)
                 last_points = points
