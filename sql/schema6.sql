@@ -22,6 +22,7 @@ create table if not exists profiles (
     disconnects int unsigned not null default 0,
     updated_on timestamp not null default current_timestamp on update current_timestamp,
     seconds_played bigint unsigned not null default 0,
+    comment varchar(256) default null;
     primary key(id),
     foreign key(user_id) references users (id)
 
