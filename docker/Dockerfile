@@ -5,12 +5,22 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN groupadd -g 3066 five && useradd -r -u 3066 -g five five
 
+RUN apt-get update
+
+RUN apt-get install software-properties-common -y
+
+RUN add-apt-repository ppa:fkrull/deadsnakes
+
 RUN apt-get update && apt-get install -y \
   libmysqlclient-dev \
   python-dev \
   virtualenv \
   gcc \
   make
+RUN apt-get install -y python-dev  \
+     build-essential libssl-dev libffi-dev \
+     libxml2-dev libxslt1-dev zlib1g-dev \
+     python-pip
 
 ENV FSROOT /opt/fiveserver
 ENV FSENV /opt/fiveserver/fsenv
