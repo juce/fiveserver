@@ -14,7 +14,7 @@ def stripZeros(s):
 
 
 def padWithZeros(s, total):
-    if isinstance(s, unicode):
+    if isinstance(s, str):
         s = s.encode('utf-8', 'replace')
     ns = str(s[:total])
     ns += '\0'*(total-len(ns))
@@ -22,7 +22,7 @@ def padWithZeros(s, total):
 
 
 def toUnicode(s):
-    if isinstance(s, unicode):
+    if isinstance(s, str):
         return s
     return s.decode('utf-8', 'replace')
 

@@ -41,7 +41,7 @@ class RegistrationResource(resource.Resource):
         if request.path == '/xsl/style.xsl':
             request.setHeader('Content-Type','text/xml')
             return self.xsl
-        elif request.path.startswith('/modifyUser/'):
+        elif request.path.startswith(b'/modifyUser/'):
             def _found(results):
                 if not results:
                     username,nonce,serial = '','',''
@@ -49,9 +49,9 @@ class RegistrationResource(resource.Resource):
                     usr = results[0]
                     username,nonce,serial = usr.username,usr.nonce,usr.serial
                 s = getFormContent(self.webDir)
-                s = s.decode('utf-8') % {'username':username,
-                                         'nonce':nonce,
-                                         'serial':serial}
+                s = s % {'username':username,
+                         'nonce':nonce,
+                         'serial':serial}
                 request.write(s.encode('utf-8'))
                 request.finish()
             request.setHeader('Content-Type','text/html')
@@ -66,7 +66,7 @@ class RegistrationResource(resource.Resource):
         else:
             request.setHeader('Content-Type','text/html')
             s = getFormContent(self.webDir)
-            s = s.decode('utf-8') % {'username':'','nonce':'','serial':''}
+            s = s % {'username':'','nonce':'','serial':''}
             return s.encode('utf-8')
  
     def sendHtmlResponse(self, request, message):

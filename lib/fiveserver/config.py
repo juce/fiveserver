@@ -340,7 +340,8 @@ class FiveServerConfig:
                     break
             if not goodSpec:
                 continue
-            netBuf = ''.join([chr(quad) for quad in quads])
+            print(quads)
+            netBuf = b''.join(struct.pack('!B', quad) for quad in quads)
             net = struct.unpack('!I',netBuf)[0]
             if bits == 0:
                 # determine mask based on net
@@ -353,7 +354,7 @@ class FiveServerConfig:
 
     def setIP(self, retryDelay=1, resetTime=True):
         def _setIP(result):
-            self.serverIP_wan = str(result).strip()
+            self.serverIP_wan = result.decode('utf-8').strip()
             if resetTime:
                 self.startDatetime = datetime.now()
             log.msg('Server IP-address: %s' % self.serverIP_wan)

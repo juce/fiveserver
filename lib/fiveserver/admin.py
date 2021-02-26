@@ -12,6 +12,9 @@ import sys
 import hashlib
 from datetime import datetime
 
+import base64
+base64.decodestring = base64.decodebytes
+
 try: import psutil
 except ImportError:
     try:
@@ -38,24 +41,26 @@ class XslResource(resource.Resource):
         self.etag = hashlib.md5(self.xsl.encode('utf-8')).hexdigest()
 
     def _sameContent(self, request):
-        etag = request.received_headers.get('If-None-Match')
+        etag = request.requestHeaders.getRawHeaders('If-None-Match')
         if not etag:
-            etag = request.received_headers.get('if-none-match')
-        return etag == self.etag
+            etag = request.requestHeaders.getRawHeaders('if-none-match')
+        if etag:
+            return etag[0] == self.etag.encode('utf-8')
+        return False
 
     def render_HEAD(self, request):
         request.setHeader('ETag', self.etag)
         if self._sameContent(request):
             request.setResponseCode(304)
-        return ''
+        return b''
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/xml')
         request.setHeader('ETag', self.etag)
         if self._sameContent(request):
             request.setResponseCode(304)
-            return ''
-        return self.xsl
+            return b''
+        return self.xsl.encode('utf-8')
 
 
 class BaseXmlResource(resource.Resource):
@@ -78,26 +83,31 @@ class BaseXmlResource(resource.Resource):
         if not self.authenticated:
             return resource.Resource.render(self, request)
         username, password = request.getUser(), request.getPassword()
-        if username in [None,'']:
+        if username:
+            username = username.decode('utf-8')
+        if password:
+            password = password.decode('utf-8')
+        if username in [None,b'']:
             request.setHeader('WWW-authenticate',
                 'Basic realm="fiveserver"')
             request.setResponseCode(401)
-            return ''
+            return b''
         elif username==self.username and password==self.password:
             return resource.Resource.render(self, request)
         else:
             request.setResponseCode(403)
             request.setHeader('Content-Type', 'text/plain')
-            return 'Not authorized'
+            return b'Not authorized'
 
     def renderError(self, error, request, responseCode=500):
         request.setHeader('Content-Type', 'text/xml')
         request.setResponseCode(responseCode)
         log.msg('SERVER ERROR: %s' % str(error.value))
-        request.write(
+        request.write((
             '%s<error text="server error" href="/home">'
             '<details>%s</details>'
-            '</error>' % (XML_HEADER, str(error.value)))
+            '</error>' % (XML_HEADER, str(error.value))
+        ).encode('utf-8'))
         request.finish()
 
 
@@ -105,7 +115,7 @@ class AdminRootResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/xml')
-        return '%s<adminService version="1.0">\
+        return ('%s<adminService version="1.0">\
                 <server version="%s" ip="%s"/>\
                 <log href="/log"/>\
                 <biglog href="/log?n=5000"/>\
@@ -128,14 +138,14 @@ class AdminRootResource(BaseXmlResource):
                         self.config.serverIP_wan,
                         self.config.serverConfig.MaxUsers,
                         self.config.serverConfig.Debug,
-                        self.config.isStoreSettingsEnabled())
+                        self.config.isStoreSettingsEnabled())).encode('utf-8')
 
 
 class StatsRootResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/xml')
-        return '%s<statsService version="1.0">\
+        return ('%s<statsService version="1.0">\
                 <server version="%s" ip="%s"/>\
                 <users href="/users"/>\
                 <profiles href="/profiles"/>\
@@ -145,7 +155,7 @@ class StatsRootResource(BaseXmlResource):
                 </statsService>' % (
                         XML_HEADER, 
                         self.config.VERSION,
-                        self.config.serverIP_wan)
+                        self.config.serverIP_wan)).encode('utf-8')
 
 
 class UsersResource(BaseXmlResource):
@@ -187,7 +197,7 @@ class UsersOnlineResource(BaseXmlResource):
         users = domish.Element((None,'users'))
         users['count'] = str(len(self.config.onlineUsers))
         users['href'] = '/home'
-        keys = self.config.onlineUsers.keys()
+        keys = list(self.config.onlineUsers.keys())
         keys.sort()
         for key in keys:
             usr = self.config.onlineUsers[key]
@@ -209,7 +219,7 @@ class UsersOnlineResource(BaseXmlResource):
             except AttributeError: pass
             try: e['ip'] = usr.lobbyConnection.addr.host
             except AttributeError: pass
-        return '%s%s' % (XML_HEADER, users.toXml().encode('utf-8'))
+        return ('%s%s' % (XML_HEADER, users.toXml())).encode('utf-8')
 
 
 class ProfilesResource(BaseXmlResource):
@@ -217,7 +227,7 @@ class ProfilesResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/xml')
-        if request.path in ['/profiles','/profiles/']:
+        if request.path in [b'/profiles',b'/profiles/']:
             # render list of profiles
             def _renderProfiles(results, offset, limit):
                 total, records = results
@@ -295,7 +305,7 @@ class ProfilesResource(BaseXmlResource):
                 request.write(('%s%s' % (
                     XML_HEADER, root.toXml())).encode('utf-8'))
                 request.finish()
-            profile_name = request.path.split('/')[-1]
+            profile_name = request.path.split(b'/')[-1].decode('utf-8')
             try: 
                 profile_id = int(profile_name)
                 d = self.config.profileLogic.getFullProfileInfoById(
@@ -372,14 +382,14 @@ class StatsResource(BaseXmlResource):
                             p = awayTeam.addElement('profile')
                             p['name'] = util.toUnicode(prf.name)
 
-        return '%s%s' % (XML_HEADER, root.toXml().encode('utf-8'))
+        return ('%s%s' % (XML_HEADER, root.toXml())).encode('utf-8')
 
 
 class UserLockResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return b'''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Enter the username to lock:</h3>
 <form name='userlockForm' action='/userlock' method='POST'>
@@ -391,32 +401,33 @@ class UserLockResource(BaseXmlResource):
     def render_POST(self, request):
         def _lockUser(results):
             def _locked(nonce):
-                request.write('''%s<userLocked username="%s" href="/home">
+                request.write(('''%s<userLocked username="%s" href="/home">
 <unlock href="%s"/></userLocked>''' % (
                     XML_HEADER, username, 
                     self._makeNonAdminURI(
-                        request, '/modifyUser/%s' % nonce)))
+                        request, '/modifyUser/%s' % nonce))
+                ).encode('utf-8'))
                 request.finish()
             def _error(error):
                 request.setResponseCode(500)
                 log.msg('SERVER ERROR: %s' % str(error.value))
-                request.write('%s<error text="server error"/>' % XML_HEADER)
+                request.write(('%s<error text="server error"/>' % XML_HEADER).encode('utf-8'))
                 request.finish()
             if not results:
                 request.setResponseCode(404)
-                request.write(
-                    '%s<error text="unknown username"/>' % XML_HEADER)
+                request.write((
+                    '%s<error text="unknown username"/>' % XML_HEADER).encode('utf-8'))
                 request.finish()
             d = self.config.lockUser(username)
             d.addCallback(_locked)
             d.addErrback(_error)
             return d
         request.setHeader('Content-Type','text/xml')
-        try: username = request.args['username'][0]
+        try: username = request.args[b'username'][0]
         except KeyError:
             request.setResponseCode(400)
             return ('%s<error '
-                    'text="username parameter missing"/>' % XML_HEADER)
+                    'text="username parameter missing"/>' % XML_HEADER).encode('utf-8')
         d = self.config.userData.findByUsername(username)
         d.addCallback(_lockUser)
         d.addErrback(self.renderError, request)
@@ -427,7 +438,7 @@ class UserKillResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return b'''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Enter the username to delete:</h3>
 <p>NOTE: you may be able to restore this user later.</p>
@@ -440,30 +451,31 @@ class UserKillResource(BaseXmlResource):
     def render_POST(self, request):
         def _deleteUser(results):
             def _deleted(nonce):
-                request.write(
+                request.write((
                     '%s<userDeleted username="%s" href="/home"/>' % (
-                    XML_HEADER, username))
+                    XML_HEADER, username)
+                ).encode('utf-8'))
                 request.finish()
             def _error(error):
                 request.setResponseCode(500)
                 log.msg('SERVER ERROR: %s' % str(error.value))
-                request.write('%s<error text="server error"/>' % XML_HEADER)
+                request.write(('%s<error text="server error"/>' % XML_HEADER).encode('utf-8'))
                 request.finish()
             if not results:
                 request.setResponseCode(404)
-                request.write(
-                    '%s<error text="unknown username"/>' % XML_HEADER)
+                request.write((
+                    '%s<error text="unknown username"/>' % XML_HEADER).encode('utf-8'))
                 request.finish()
             d = self.config.deleteUser(username)
             d.addCallback(_deleted)
             d.addErrback(_error)
             return d
         request.setHeader('Content-Type','text/xml')
-        try: username = request.args['username'][0]
+        try: username = request.args[b'username'][0]
         except KeyError:
             request.setResponseCode(400)
             return ('%s<error '
-                    'text="username parameter missing"/>' % XML_HEADER)
+                    'text="username parameter missing"/>' % XML_HEADER).encode('utf-8')
         d = self.config.userData.findByUsername(username)
         d.addCallback(_deleteUser)
         d.addErrback(self.renderError, request)
@@ -479,62 +491,62 @@ class LogResource(BaseXmlResource):
             logFile = open(logFile)
             logLines = logFile.readlines()
             logFile.close()
-            try: n = int(request.args['n'][0])
+            try: n = int(request.args[b'n'][0])
             except: n = 30
             n = min(len(logLines),n)
             n = max(10,min(5000,n))  # keep n sane: [10,5000]
-            request.write('Last %d lines of the log:\r\n' % n)
-            request.write('===========================================\r\n')
+            request.write(b'Last %d lines of the log:\r\n' % n)
+            request.write(b'===========================================\r\n')
             for line in logLines[-n:]:
-                request.write(line)
+                request.write(line.encode('utf-8'))
             return ''
         else:
             request.setHeader('Content-Type','text/xml')
-            return '%s<error text="no log file available"/>' % XML_HEADER
+            return ('%s<error text="no log file available"/>' % XML_HEADER).encode('utf-8')
 
 
 class DebugResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return ('''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Set debug value: (currently: %s)</h3>
 <form name='debugForm' action='/debug' method='POST'>
 <input name='debug' value='' type='text' size='40'/>
 <input name='set' value='set' type='submit'/>
 </form>
-</body></html>''' % self.config.serverConfig.Debug
+</body></html>''' % self.config.serverConfig.Debug).encode('utf-8')
 
     def render_POST(self, request):
-        try: debugStr = request.args['debug'][0].lower()
+        try: debugStr = request.args[b'debug'][0].lower()
         except KeyError: debugStr = ''
-        if debugStr in ['0','false','no']:
+        if debugStr in [b'0',b'false',b'no']:
             self.config.serverConfig.Debug = False
-        elif debugStr in ['1','true','yes']:
+        elif debugStr in [b'1',b'true',b'yes']:
             self.config.serverConfig.Debug = True
         log.setDebug(self.config.serverConfig.Debug)
         request.setHeader('Content-Type','text/xml')
-        return '%s<debug enabled="%s" href="/home"/>' % (
-                XML_HEADER, self.config.serverConfig.Debug)
+        return ('%s<debug enabled="%s" href="/home"/>' % (
+                XML_HEADER, self.config.serverConfig.Debug)).encode('utf-8')
 
 
 class MaxUsersResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return ('''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Set MaxUsers value: (currently: %s)</h3>
 <form name='maxUsersForm' action='/maxusers' method='POST'>
 <input name='maxusers' value='' type='text' size='40'/>
 <input name='set' value='set' type='submit'/>
 </form>
-</body></html>''' % self.config.serverConfig.MaxUsers
+</body></html>''' % self.config.serverConfig.MaxUsers).encode('utf-8')
 
     def render_POST(self, request):
         try: 
-            maxusers = int(request.args['maxusers'][0])
+            maxusers = int(request.args[b'maxusers'][0])
         except (KeyError, ValueError): 
             maxusers = self.config.serverConfig.MaxUsers
         if maxusers not in range(1001):
@@ -542,33 +554,33 @@ class MaxUsersResource(BaseXmlResource):
             
         self.config.serverConfig.MaxUsers = maxusers
         request.setHeader('Content-Type','text/xml')
-        return '%s<maxUsers value="%s" href="/home"/>' % (
-                XML_HEADER, self.config.serverConfig.MaxUsers)
+        return ('%s<maxUsers value="%s" href="/home"/>' % (
+                XML_HEADER, self.config.serverConfig.MaxUsers)).encode('utf-8')
 
 
 class StoreSettingsResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return ('''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Set store-settings flag value: (currently: %s)</h3>
 <form name='settingsForm' action='/settings' method='POST'>
 <input name='store' value='' type='text' size='40'/>
 <input name='set' value='set' type='submit'/>
 </form>
-</body></html>''' % self.config.isStoreSettingsEnabled()
+</body></html>''' % self.config.isStoreSettingsEnabled()).encode('utf-8')
 
     def render_POST(self, request):
-        try: storeStr = request.args['store'][0].lower()
+        try: storeStr = request.args[b'store'][0].lower()
         except KeyError: storeStr = ''
-        if storeStr in ['0','false','no']:
+        if storeStr in [b'0',b'false',b'no']:
             self.config.serverConfig.StoreSettings = False
-        elif storeStr in ['1','true','yes']:
+        elif storeStr in [b'1',b'true',b'yes']:
             self.config.serverConfig.StoreSettings = True
         request.setHeader('Content-Type','text/xml')
-        return '%s<storeSettings enabled="%s" href="/home"/>' % (
-                XML_HEADER, self.config.serverConfig.StoreSettings)
+        return ('%s<storeSettings enabled="%s" href="/home"/>' % (
+                XML_HEADER, self.config.serverConfig.StoreSettings)).encode('utf-8')
 
 
 class BannedResource(BaseXmlResource):
@@ -582,20 +594,20 @@ class BannedResource(BaseXmlResource):
         entries.sort()
         for entry in entries:
             e = li.addElement('entry')
-            e['href'] = '/ban-remove?entry=%s' % urllib.quote(entry)
+            e['href'] = '/ban-remove?entry=%s' % urllib.parse.quote(entry.encode('utf-8'), safe='')
             e['spec'] = entry
             #e.addContent(entry)
         banned.addElement('add')['href'] = '/ban-add'
-        return '%s%s' % (XML_HEADER, banned.toXml().encode('utf-8'))
+        return ('%s%s' % (XML_HEADER, banned.toXml())).encode('utf-8')
 
 
 class BanAddResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        try: entry = request.args['entry'][0]
+        try: entry = request.args[b'entry'][0]
         except KeyError: entry = ''
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return ('''<html><head><title>FiveServer Admin Service</title>
 <style>span.ip {color:#800;}</style>
 </head><body>
 <h3>New entry to add to the banned list:</h3>
@@ -629,45 +641,48 @@ You can either use specific IP or a network, with or without mask
 <span class="ip">192.168.0.0/16</span>
 - same as above
 </p>
-</body></html>''' % {'entry':entry}
+</body></html>''' % {'entry':entry}).encode('utf-8')
 
     def render_POST(self, request):
         request.setHeader('Content-Type','text/xml')
-        try: entry = request.args['entry'][0]
-        except KeyError: entry = ''
+        try: entry = request.args[b'entry'][0]
+        except KeyError: entry = b''
+        entry = entry.decode('utf-8')
         try:
             try: entryIndex = self.config.bannedList.Banned.index(entry)
             except ValueError:
-                if entry.strip()!='':
+                if entry.strip()!=b'':
                     self.config.bannedList.Banned.append(entry)
                     self.config.bannedList.save()
                     self.config.makeFastBannedList()
-            return '%s<actionAccepted href="/banned" />' % XML_HEADER
+            return ('%s<actionAccepted href="/banned" />' % XML_HEADER).encode('utf-8')
         except Exception as info:
             request.setResponseCode(500)
             log.msg('SERVER ERROR: %s' % info)
-            return '%s<error text="server error"/>' % XML_HEADER
+            return ('%s<error text="server error"/>' % XML_HEADER).encode('utf-8')
 
 
 class BanRemoveResource(BaseXmlResource):
 
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        try: entry = request.args['entry'][0]
-        except KeyError: entry = ''
-        return '''<html><head><title>FiveServer Admin Service</title>
+        try: entry = request.args[b'entry'][0]
+        except KeyError: entry = b''
+        entry = entry.decode('utf-8')
+        return ('''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Remove this entry from the banned list:</h3>
 <form name='banForm' action='/ban-remove' method='POST'>
 <input name='entry' value='%(entry)s' type='text' size='40'/>
 <input name='remove' value='remove' type='submit'/>
 </form>
-</body></html>''' % {'entry':entry}
+</body></html>''' % {'entry':entry}).encode('utf-8')
 
     def render_POST(self, request):
         request.setHeader('Content-Type','text/xml')
-        try: entry = request.args['entry'][0]
-        except KeyError: entry = ''
+        try: entry = request.args[b'entry'][0]
+        except KeyError: entry = b''
+        entry = entry.decode('utf-8')
         try:
             try: entryIndex = self.config.bannedList.Banned.index(entry)
             except ValueError:
@@ -676,32 +691,30 @@ class BanRemoveResource(BaseXmlResource):
                 del self.config.bannedList.Banned[entryIndex]
                 self.config.bannedList.save()
                 self.config.makeFastBannedList()
-            return '%s<actionAccepted href="/banned" />' % XML_HEADER
+            return ('%s<actionAccepted href="/banned" />' % XML_HEADER).encode('utf-8')
         except Exception as info:
             request.setResponseCode(500)
             log.msg('SERVER ERROR: %s' % info)
-            return '%s<error text="server error"/>' % XML_HEADER
+            return ('%s<error text="server error"/>' % XML_HEADER).encode('utf-8')
 
 
 class ServerIpResource(BaseXmlResource):
     
     def render_GET(self, request):
         request.setHeader('Content-Type','text/html')
-        try: entry = request.args['entry'][0]
-        except KeyError: entry = ''
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return ('''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Current server IP is: %(ip)s</h3>
 <form name='ipRequeryForm' action='/server-ip' method='POST'>
 <input name='requery' value='requery' type='submit'/>
 </form>
-</body></html>''' % {'ip':self.config.serverIP_wan}
+</body></html>''' % {'ip':self.config.serverIP_wan}).encode('utf-8')
 
     def render_POST(self, request):
         self.config.setIP(resetTime=False)
         request.setHeader('Content-Type','text/xml')
-        return '%s<serverIP-requery started="true" href="/home"/>' % (
-                XML_HEADER)
+        return ('%s<serverIP-requery started="true" href="/home"/>' % (
+                XML_HEADER)).encode('utf-8')
 
 
 class RosterResource(BaseXmlResource):
@@ -712,7 +725,7 @@ class RosterResource(BaseXmlResource):
         except: enforceHash = False
         try: compareHash = self.config.serverConfig.Roster['compareHash']
         except: compareHash = False
-        return '''<html><head><title>FiveServer Admin Service</title>
+        return ('''<html><head><title>FiveServer Admin Service</title>
 </head><body>
 <h3>Edit roster-verification settings</h3>
 <form name='rosterSettingsForm' action='/roster' method='POST'>
@@ -730,24 +743,24 @@ class RosterResource(BaseXmlResource):
 </form>
 </body></html>''' % {
 'enforceHash':enforceHash,
-'compareHash':compareHash}
+'compareHash':compareHash}).encode('utf-8')
 
     def render_POST(self, request):
         try: 
-            enforceHash = request.args['enforceHash'][0].lower() in [
-                '1','true']
-            compareHash = request.args['compareHash'][0].lower() in [
-                '1','true']
+            enforceHash = request.args[b'enforceHash'][0].lower() in [
+                b'1',b'true']
+            compareHash = request.args[b'compareHash'][0].lower() in [
+                b'1',b'true']
             self.config.serverConfig.Roster = {
                 'enforceHash':enforceHash,
                 'compareHash':compareHash}
             request.setHeader('Content-Type','text/xml')
             return ('%s<result text="roster settings changed" '
-                    'href="/home"/>' % XML_HEADER)
+                    'href="/home"/>' % XML_HEADER).encode('utf-8')
         except IndexError:
             request.setHeader('Content-Type','text/xml')
             return ('%s<error text="missing or incorrect parameters" '
-                    'href="/home"/>' % XML_HEADER)
+                    'href="/home"/>' % XML_HEADER).encode('utf-8')
 
 
 class ProcessInfoResource(BaseXmlResource):
@@ -781,7 +794,7 @@ class ProcessInfoResource(BaseXmlResource):
                     p.get_memory_info()[0]/1024.0/1024)
             extra = procInfo.addElement('info')
             extra['cmdline'] = ' '.join(sys.argv)
-            request.write(XML_HEADER)
+            request.write(XML_HEADER.encode('utf-8'))
             request.write(procInfo.toXml().encode('utf-8'))
             request.finish()
         try: self.process
