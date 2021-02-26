@@ -45,7 +45,7 @@ class XslResource(resource.Resource):
         if not etag:
             etag = request.requestHeaders.getRawHeaders('if-none-match')
         if etag:
-            return etag[0] == self.etag.encode('utf-8')
+            return etag[0] == self.etag
         return False
 
     def render_HEAD(self, request):
@@ -76,7 +76,7 @@ class BaseXmlResource(resource.Resource):
 
     def _makeNonAdminURI(self, request, path):
         return 'http://%s:%d%s' % (
-                request.getRequestHostname(), 
+                request.getRequestHostname().decode('utf-8'),
                 self.adminConfig.FiveserverWebPort, path)
 
     def render(self, request):
@@ -423,7 +423,7 @@ class UserLockResource(BaseXmlResource):
             d.addErrback(_error)
             return d
         request.setHeader('Content-Type','text/xml')
-        try: username = request.args[b'username'][0]
+        try: username = request.args[b'username'][0].decode('utf-8')
         except KeyError:
             request.setResponseCode(400)
             return ('%s<error '
@@ -471,7 +471,7 @@ class UserKillResource(BaseXmlResource):
             d.addErrback(_error)
             return d
         request.setHeader('Content-Type','text/xml')
-        try: username = request.args[b'username'][0]
+        try: username = request.args[b'username'][0].decode('utf-8')
         except KeyError:
             request.setResponseCode(400)
             return ('%s<error '
@@ -499,7 +499,7 @@ class LogResource(BaseXmlResource):
             request.write(b'===========================================\r\n')
             for line in logLines[-n:]:
                 request.write(line.encode('utf-8'))
-            return ''
+            return b''
         else:
             request.setHeader('Content-Type','text/xml')
             return ('%s<error text="no log file available"/>' % XML_HEADER).encode('utf-8')

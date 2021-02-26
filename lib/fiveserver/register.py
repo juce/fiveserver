@@ -38,9 +38,9 @@ class RegistrationResource(resource.Resource):
         self.cipher = Blowfish.new(binascii.a2b_hex(self.config.cipherKey))
 
     def render_GET(self, request):
-        if request.path == '/xsl/style.xsl':
+        if request.path == b'/xsl/style.xsl':
             request.setHeader('Content-Type','text/xml')
-            return self.xsl
+            return self.xsl.encode('utf-8')
         elif request.path.startswith(b'/modifyUser/'):
             def _found(results):
                 if not results:
@@ -55,14 +55,14 @@ class RegistrationResource(resource.Resource):
                 request.write(s.encode('utf-8'))
                 request.finish()
             request.setHeader('Content-Type','text/html')
-            nonce = request.path.split('/')[-1]
+            nonce = request.path.split(b'/')[-1]
             d = self.config.userData.findByNonce(nonce)
             d.addCallback(_found)
             return server.NOT_DONE_YET
 
-        elif request.path == '/md5.js':
+        elif request.path == b'/md5.js':
             request.setHeader('Content-Type','text/javascript')
-            return open('%s/md5.js' % self.webDir).read()
+            return open('%s/md5.js' % self.webDir).read().encode('utf-8')
         else:
             request.setHeader('Content-Type','text/html')
             s = getFormContent(self.webDir)
@@ -122,11 +122,11 @@ class RegistrationResource(resource.Resource):
             d.addCallback(_created)
             d.addErrback(_failed)
             return d
-        serial = request.args['serial'][0]
-        username = request.args['user'][0]
-        hash = request.args['hash'][0]
-        nonce = request.args['nonce'][0]
-        try: fmt = request.args['format'][0]
+        serial = request.args[b'serial'][0].decode('utf-8')
+        username = request.args[b'user'][0].decode('utf-8')
+        hash = request.args[b'hash'][0].decode('utf-8')
+        nonce = request.args[b'nonce'][0].decode('utf-8')
+        try: fmt = request.args[b'format'][0].decode('utf-8')
         except: fmt = None
         #userKey = '%s-%s' % (
         #        binascii.b2a_hex(
