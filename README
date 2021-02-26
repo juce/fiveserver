@@ -1,5 +1,5 @@
-Fiveserver 0.4.11
-Copyright (C) 2011-2018 juce and reddwarf
+Fiveserver 0.4.12
+Copyright (C) 2011-2021 juce and reddwarf
 License: BSD-style
 
 
@@ -44,18 +44,11 @@ http://sites.google.com/site/fiveservercom/
    sudo apt-get -y update
    sudo apt-get install libmysqlclient-dev python-dev gcc make
 
-2. Install Python 2.6 (or later), if your system doesn't have it.
+2. Install Python 3, if your system doesn't have it.
    Go to http://python.org/download/ and get the installer that is appropriate
    for your operating system. (If you are on Linux, you can also use yum or apt-get)
 
-3. Install virtualenv
-   Download the source tarball from http://pypi.python.org/pypi/virtualenv/
-   unzip the archive, switch to virtualenv source directory, 
-   then build and install with this command:
-
-   sudo python2.6 setup.py install
-
-4. Return to fiveserver source directory and install all the necessary dependencies
+3. Return to fiveserver source directory and install all the necessary dependencies
    by issuing this command (as yourself, not root):
 
    make install

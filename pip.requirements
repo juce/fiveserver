@@ -4,3 +4,4 @@ Twisted
 pyOpenSSL
 pycrypto
 zope.interface
+service-identity

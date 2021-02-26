@@ -5,4 +5,5 @@ all:
 FSENV=$(HOME)/fsenv
 install:
 	python3 -m venv $(FSENV)
+	$(FSENV)/bin/pip install wheel
 	$(FSENV)/bin/pip install -r ./pip.requirements

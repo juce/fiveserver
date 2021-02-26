@@ -148,7 +148,7 @@ class FiveServerConfig:
     the instance of FiveServer.
     """
 
-    VERSION = '0.4.11'
+    VERSION = '0.4.12'
     
 
     def __init__(self, serverConfig, dbConfig,
