@@ -42,7 +42,7 @@ http://sites.google.com/site/fiveservercom/
    the command is going to be different, but for example, on Ubuntu:
 
    sudo apt-get -y update
-   sudo apt-get install libmysqlclient-dev python-dev gcc make
+   sudo apt-get install libmysqlclient-dev python3 python3-venv python3-dev gcc make
 
 2. Install Python 3, if your system doesn't have it.
    Go to http://python.org/download/ and get the installer that is appropriate
@@ -65,32 +65,30 @@ CONFIGURE MYSQL DATABASES
 The following instructions assume that you can use a command-line mysql client 
 utility to connect to your MySQL server with a root account.
 
-For Fiveserver (PES5/WE9/WE9LE), you will need to create a databases, and grant
+For Fiveserver (PES5/WE9/WE9LE), you will need to create a database and grant
 appropriate permissions. If you use default database name and login/password 
 (you can change all of those in ./etc/conf/fiveserver.yaml), then it would be this:
 
 mysql> create database fiveserver;
 mysql> grant select, insert, update on fiveserver.* to 'fiveserver'@'%' identified by 'we9le';
 
-Create the tables and apply alters:
+Create the tables:
 
 mysql> use fiveserver;
 mysql> source ./sql/schema.sql
-mysql> source ./sql/alter_001_add_settings.sql
 
 
-For Sixserver (PES6/WE2007), you will need to create a databases, and grant
+For Sixserver (PES6/WE2007), you will need to create a database and grant
 appropriate permissions. If you use default database name and login/password 
 (you can change all of those in ./etc/conf/sixserver.yaml), then it would be this:
 
 mysql> create database sixserver;
 mysql> grant select, insert, update on sixserver.* to 'sixserver'@'%' identified by 'proevo';
 
-Create the tables and apply alters:
+Create the tables:
 
 mysql> use sixserver;
 mysql> source ./sql/schema6.sql
-mysql> source ./sql/alter6_001_modify_profiles.sql
 
 
 
