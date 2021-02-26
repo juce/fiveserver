@@ -18,7 +18,7 @@ create table if not exists profiles (
     name varchar(32) not null unique,
     fav_player bigint unsigned default 0,
     fav_team bigint unsigned default 0,
-    rank int unsigned not null default 0,
+    `rank` int unsigned not null default 0,
     points int unsigned not null default 0,
     disconnects int unsigned not null default 0,
     updated_on timestamp not null default current_timestamp on update current_timestamp,
