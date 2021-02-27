@@ -53,7 +53,7 @@ class Lobby:
                 struct.pack('!H',len(self.players)))
 
     def getPlayerByProfileId(self, id):
-        for usr in self.players.itervalues():
+        for usr in self.players.values():
             if usr.profile.id == id:
                 return usr
         return None
@@ -109,7 +109,7 @@ class Lobby:
         return self.rooms[name]
 
     def getRoomById(self, roomId):
-        for room in self.rooms.itervalues():
+        for room in self.rooms.values():
             if room.id == roomId:
                 return room
         return None

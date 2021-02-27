@@ -915,7 +915,7 @@ class MainService(RosterHandler, pes5.MainService):
         if not room.match:
             log.msg('ERROR: Goal reported, but no match in the room.')
         else:
-            if pkt.data[0] == b'\0':
+            if pkt.data[0] == 0:
                 log.msg('GOAL SCORED by HOME team %d (%s)' % (
                     room.teamSelection.home_team_id, 
                     getHomePlayerNames(room.match)))

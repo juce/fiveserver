@@ -55,7 +55,7 @@ class WeightedPool:
 
     def weightedChoice(self, choices):
         sumWeight = 0
-        for choice, (cumulative, count) in choices.iteritems():
+        for choice, (cumulative, count) in choices.items():
             sumWeight+= cumulative/count
 
     def getPoolItem(self):

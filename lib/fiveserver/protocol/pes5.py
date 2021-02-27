@@ -990,7 +990,7 @@ class MainService(NetworkMenuService):
 
     def goalScored_4368(self, pkt):
         room = self._user.state.room
-        if pkt.data[0] == b'\0':
+        if pkt.data[0] == 0:
             log.msg('GOAL SCORED by HOME team %d (%s)' % (
                 room.match.home_team_id, room.match.home_profile.name))
             room.match.score_home += 1
@@ -1009,7 +1009,7 @@ class MainService(NetworkMenuService):
         room = self._user.state.room
         if room is not None and room.match is not None:
             exitType = struct.unpack('!B', pkt.data[1])[0]
-            if pkt.data[0] == b'\0':
+            if pkt.data[0] == 0:
                 room.match.home_exit = exitType
             else:
                 room.match.away_exit = exitType
