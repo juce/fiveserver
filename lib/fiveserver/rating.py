@@ -54,6 +54,8 @@ class RatingMath:
         """
         for division, threshold in enumerate([250,450,600,750]):
             if points < threshold:
+                print("getDivision:",division)
                 return division
+        print("getDivision:",4)
         return 4
 

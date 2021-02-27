@@ -228,9 +228,9 @@ class ProfileData:
                'fav_player=%s, fav_team=%s, `rank`=%s, '
                'points=%s, disconnects=%s, seconds_played=%s')
         params = (p.id, p.userId, p.index, p.name, p.favPlayer, p.favTeam,
-                  p.rank, p.points, p.disconnects, p.playTime.total_seconds(),
+                  p.rank, p.points, p.disconnects, int(p.playTime.total_seconds()),
                   p.userId, p.index, p.name, p.favPlayer, p.favTeam, p.rank,
-                  p.points, p.disconnects, p.playTime.total_seconds())
+                  p.points, p.disconnects, int(p.playTime.total_seconds()))
         yield self.dbController.dbWrite(0, sql, *params)
         defer.returnValue(True)
 
@@ -243,6 +243,7 @@ class ProfileData:
 
     @defer.inlineCallbacks
     def findByName(self, profileName):
+        print("findByName:",profileName)
         sql = ('SELECT id,user_id,ordinal,name,fav_player,fav_team,'
                '`rank`,points,disconnects,updated_on,seconds_played '
                'FROM profiles WHERE deleted = 0 AND name = %s')
@@ -261,6 +262,7 @@ class ProfileData:
             p.updatedOn = row[9]
             p.playTime = timedelta(seconds=row[10])
             results.append(p)
+        print(results)
         defer.returnValue(results)
 
     @defer.inlineCallbacks

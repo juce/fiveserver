@@ -111,7 +111,7 @@ class NewsProtocol(PacketDispatcher):
                 break
         serverIP = self.factory.configuration.serverIP_wan
         servers = [
-            (-1,2,self.SERVER_NAME.encode('utf-8'),serverIP,
+            (-1,2,self.SERVER_NAME,serverIP,
              self.factory.serverConfig.NetworkServer['mainService'],
              max(0, self.factory.getNumUsersOnline()-1),2),
             (-1,3,'NETWORK_MENU',serverIP,
@@ -124,8 +124,8 @@ class NewsProtocol(PacketDispatcher):
         data = b''.join([b'%s%s%s%s%s%s%s' % (
                 struct.pack('!i',a),
                 struct.pack('!i',b),
-                b'%s%s' % (name.encode('utf-8'),'\0'*(32-len(name[:32]))),
-                b'%s%s' % (ip.encode('utf-8'),'\0'*(15-len(ip))),
+                b'%s%s' % (name.encode('utf-8'),b'\0'*(32-len(name[:32]))),
+                b'%s%s' % (ip.encode('utf-8'),b'\0'*(15-len(ip))),
                 struct.pack('!H',port),
                 struct.pack('!H',c),
                 struct.pack('!H',d)) for a,b,name,ip,port,c,d in servers])
@@ -176,7 +176,7 @@ class LoginService(PacketDispatcher):
     def do_3001(self, pkt):
         self.send(
             packet.Packet(packet.PacketHeader(
-                0x3002,16,self._count),'\0'*16))
+                0x3002,16,self._count),b'\0'*16))
 
     def checkRosterHash(self, clientRosterHash):
         try: 
@@ -189,7 +189,7 @@ class LoginService(PacketDispatcher):
             # heuristic to check if indeed the hash was provided:
             # if the hash has 4 zero-bytes together in it - then VERY LIKELY
             # this is not an MD5 checksum.
-            if clientRosterHash.find('\0\0\0\0') != -1:
+            if clientRosterHash.find(b'\0\0\0\0') != -1:
                 return False
         return True
 
@@ -246,6 +246,7 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def getProfiles_3010(self, pkt):
+        print("getting profiles...")
         if self.factory.serverConfig.ShowStats:
             results = yield defer.DeferredList([
                 self.factory.matchData.getGames(
@@ -257,27 +258,36 @@ class LoginService(PacketDispatcher):
                 for profile in self._user.profiles])
             profiles = [self.makePristineProfile(profile) 
                 for profile in self._user.profiles]
+        print("results:",results)
+        print("profiles:",profiles)
         data = b'\0'*4 + b''.join([
             b'%(index)s%(id)s%(name)s%(playTime)s'
             b'%(division)s%(points)s%(games)s' % {
-                'index':struct.pack('!B', i),
-                'id':struct.pack('!i', profile.id),
-                'name':util.padWithZeros(profile.name, 16),
-                'playTime':struct.pack('!i', profile.playTime.total_seconds()),
-                'division':struct.pack('!B', 
+                b'index':struct.pack('!B', i),
+                b'id':struct.pack('!i', profile.id),
+                b'name':util.padWithZeros(profile.name, 16),
+                b'playTime':struct.pack('!i', int(profile.playTime.total_seconds())),
+                b'division':struct.pack('!B', 
                     self.factory.ratingMath.getDivision(profile.points)),
-                'points':struct.pack('!i', profile.points),
-                'games':struct.pack('!H', games)} 
+                b'points':struct.pack('!i', profile.points),
+                b'games':struct.pack('!H', games)} 
             for (_, games), (i, profile) in zip(
                 results, enumerate(profiles))])
+        print("data:",data)
         self.sendData(0x3012, data)
         defer.returnValue(None)
 
     @defer.inlineCallbacks
     def createProfile_3020(self, pkt):
-        profileIndex = struct.unpack('!B',pkt.data[0])[0]  # 0-2
+        print("getting profile index ...")
+        profileIndex = struct.unpack('!B',pkt.data[0:1])[0]  # 0-2
+        print("profileIndex:",profileIndex)
         playerName = util.stripZeros(pkt.data[1:])            # 16-char name
+        print("playerName:",playerName)
+        playerName = playerName.decode('utf-8')
+        print("playerName:",playerName)
         profileNameExists = yield self.factory.profileNameExists(playerName)
+        print("profileNameExists:",profileNameExists)
         if profileNameExists:
             log.msg('ProfileNameExistsError: %s' % playerName)
             self.sendData(0x3022, struct.pack('!I',0xfffffefc))
@@ -292,7 +302,7 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def deleteProfile_3030(self, pkt):
-        profileIndex = struct.unpack('!B', pkt.data[0])[0]
+        profileIndex = struct.unpack('!B', pkt.data[0:1])[0]
         yield self.factory.deleteProfile(
             self._user.profiles[profileIndex])
         self._user.profiles[profileIndex].id = 0
@@ -304,7 +314,7 @@ class LoginService(PacketDispatcher):
     def do_3060(self, pkt):
         #self.sendZeros(0x3062,14)
         #self.sendData(0x3062,'\0\0\0\0')
-        self.sendData(0x3062,'\0')
+        self.sendData(0x3062,b'\0')
 
     def selectProfile_3040(self, pkt):
         id = struct.unpack('!i',pkt.data[0:4])[0]
@@ -399,7 +409,7 @@ class LoginService(PacketDispatcher):
         defer.returnValue(None)
 
     def do_3088(self, pkt):
-        if pkt.data[2] == '\3':
+        if pkt.data[2] == b'\3':
             # update settings
             settings1 = zlib.compress(pkt.data)
             self._user.profile.settings.settings1 = settings1
@@ -540,14 +550,14 @@ class NetworkMenuService(LoginService):
                             util.padWithZeros(room.name, 32))
                     room.owner.sendData(0x4331,data)
                 # send room update
-                for usr in thisLobby.players.itervalues():
+                for usr in thisLobby.players.values():
                     n = len(room.players)
                     data = b'%s%s%s%s%s%s%s' % (
                             struct.pack('!i',room.id), 
                             struct.pack('!B',1),
                             struct.pack('!B',int(room.usePassword)),
                             util.padWithZeros(room.name,32),
-                            struct.pack('!B',room.matchTime/5),
+                            struct.pack('!B',int(room.matchTime/5)),
                             b''.join([b'%s%s\0\0\0\0\0' % (
                                         struct.pack('!i',x.profile.id),
                                         struct.pack('!H',x.state.teamId)) 
@@ -556,7 +566,7 @@ class NetworkMenuService(LoginService):
                     usr.sendData(0x4306,data)
                 # notify all users in the lobby that 
                 # player is now back in lobby (not in room)
-                for usr in thisLobby.players.itervalues():
+                for usr in thisLobby.players.values():
                     data = self.formatPlayerInfo(self._user, room.id)
                     usr.sendData(0x4222,data)
                 self.sendZeros(0x432b,4)
@@ -564,13 +574,13 @@ class NetworkMenuService(LoginService):
                 if room.isEmpty():
                     # notify users in lobby that the room is gone
                     data = struct.pack('!i',room.id)
-                    for usr in thisLobby.players.itervalues():
+                    for usr in thisLobby.players.values():
                         usr.sendData(0x4305,data)
                     thisLobby.deleteRoom(room)
             # exit lobby
             thisLobby.exit(self._user)
             # notify every remaining occupant in the lobby
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 usr.sendData(0x4221,struct.pack('!i',self._user.profile.id))
 
 
@@ -592,27 +602,27 @@ class NetworkMenuService(LoginService):
                 b'%(win-best)s%(disconnects)s%(PAD1)s'
                 b'%(goals-scored)s%(PAD2)s%(goals-allowed)s'
                 b'%(fav-team)s%(fav-player)s%(rank)s' % {
-                    'id': struct.pack('!i',profile.id),
-                    'name': util.padWithZeros(profile.name, 16),
-                    'division': struct.pack('!B', 
+                    b'id': struct.pack('!i',profile.id),
+                    b'name': util.padWithZeros(profile.name, 16),
+                    b'division': struct.pack('!B', 
                         self.factory.ratingMath.getDivision(profile.points)),
-                    'points': struct.pack('!i', profile.points),
-                    'games': struct.pack('!H', 
+                    b'points': struct.pack('!i', profile.points),
+                    b'games': struct.pack('!H', 
                         stats.wins+stats.losses+stats.draws),
-                    'wins': struct.pack('!H', stats.wins),
-                    'losses': struct.pack('!H', stats.losses),
-                    'draws': struct.pack('!H', stats.draws),
-                    'win-strk': struct.pack('!H', stats.streak_current),
-                    'win-best': struct.pack('!H', stats.streak_best),
-                    'disconnects': struct.pack(
+                    b'wins': struct.pack('!H', stats.wins),
+                    b'losses': struct.pack('!H', stats.losses),
+                    b'draws': struct.pack('!H', stats.draws),
+                    b'win-strk': struct.pack('!H', stats.streak_current),
+                    b'win-best': struct.pack('!H', stats.streak_best),
+                    b'disconnects': struct.pack(
                         '!H', profile.disconnects),
-                    'PAD1': b'\0\0',
-                    'goals-scored': struct.pack('!H', stats.goals_scored),
-                    'PAD2': b'\0\0',
-                    'goals-allowed': struct.pack('!H', stats.goals_allowed),
-                    'fav-team': struct.pack('!H', profile.favTeam),
-                    'fav-player': struct.pack('!i', profile.favPlayer),
-                    'rank': struct.pack('!i', profile.rank),
+                    b'PAD1': b'\0\0',
+                    b'goals-scored': struct.pack('!H', stats.goals_scored),
+                    b'PAD2': b'\0\0',
+                    b'goals-allowed': struct.pack('!H', stats.goals_allowed),
+                    b'fav-team': struct.pack('!H', profile.favTeam),
+                    b'fav-player': struct.pack('!i', profile.favPlayer),
+                    b'rank': struct.pack('!i', profile.rank),
                 })
 
     def formatRoomSettings(self, settings):
@@ -620,22 +630,22 @@ class NetworkMenuService(LoginService):
                 b'%(matchTime)s%(timeLimit)s%(pauses)s%(condition)s'
                 b'%(injuries)s%(maxSubs)s%(extraTime)s%(penalties)s'
                 b'%(dayTime)s%(seasonWeather)s%(randomInt)s%(pad1)s' % {
-            'matchTime':struct.pack('!B', settings.matchTime),
-            'timeLimit':struct.pack('!B', settings.timeLimit),
-            'pauses':struct.pack('!B', settings.pauses),
-            'condition':struct.pack('!B', settings.condition),
-            'injuries':struct.pack('!B', settings.injuries),
-            'maxSubs':struct.pack('!B', settings.maxSubs),
-            'extraTime':struct.pack('!B', settings.extraTime),
-            'penalties':struct.pack('!B', settings.penalties),
-            'dayTime':struct.pack('!B', settings.dayTime),
-            'seasonWeather':struct.pack('!B', settings.seasonWeather),
-            'randomInt':struct.pack('!i', 0),
-            'pad1':b'\0'*50})
+            b'matchTime':struct.pack('!B', settings.matchTime),
+            b'timeLimit':struct.pack('!B', settings.timeLimit),
+            b'pauses':struct.pack('!B', settings.pauses),
+            b'condition':struct.pack('!B', settings.condition),
+            b'injuries':struct.pack('!B', settings.injuries),
+            b'maxSubs':struct.pack('!B', settings.maxSubs),
+            b'extraTime':struct.pack('!B', settings.extraTime),
+            b'penalties':struct.pack('!B', settings.penalties),
+            b'dayTime':struct.pack('!B', settings.dayTime),
+            b'seasonWeather':struct.pack('!B', settings.seasonWeather),
+            b'randomInt':struct.pack('!i', 0),
+            b'pad1':b'\0'*50})
 
     @defer.inlineCallbacks
     def do_4100(self, pkt):
-        profileIndex = struct.unpack('!B',pkt.data[0])[0]
+        profileIndex = struct.unpack('!B',pkt.data[0:1])[0]
         self._user.profile = self._user.profiles[profileIndex]
         #data = '\0'*4+struct.pack('!i',self._user.profile.id)+\
         data = b'%s%s' % (
@@ -670,7 +680,7 @@ class NetworkMenuService(LoginService):
         defer.returnValue(None)
 
     def getLobbies_4200(self, pkt): 
-        self._user.gameVersion = struct.unpack('!B',pkt.data[0])[0]
+        self._user.gameVersion = struct.unpack('!B',pkt.data[0:1])[0]
         data = b'%s%s' % (
             struct.pack('!H',len(self.factory.getLobbies())),
             b''.join([bytes(x) for x in self.factory.getLobbies()]))
@@ -698,7 +708,7 @@ class NetworkMenuService(LoginService):
 
     def broadcastSystemChat(self, aLobby, text):
         chatMessage = lobby.ChatMessage(lobby.SYSTEM_PROFILE, text)
-        for usr in aLobby.players.itervalues():
+        for usr in aLobby.players.values():
             data = b'%s%s%s%s%s' % (
                     b'\0',
                     b'\0\0\0\0',
@@ -711,16 +721,21 @@ class NetworkMenuService(LoginService):
     @defer.inlineCallbacks
     def selectLobby_4202(self, pkt):
         self._user.state = user.UserState()
-        self._user.state.lobbyId = struct.unpack('!B',pkt.data[0])[0]
+        print("making UserState ...")
+        self._user.state.lobbyId = struct.unpack('!B',pkt.data[0:1])[0]
+        print(self._user.state)
         self._user.state.ip1 = pkt.data[1:17]
         self._user.state.ip2 = pkt.data[19:35]
+        print(self._user.state)
         self._user.state.udpPort1 = struct.unpack('!H',pkt.data[17:19])[0]
         self._user.state.udpPort2 = struct.unpack('!H',pkt.data[35:37])[0]
         self._user.state.someField = struct.unpack('!H',pkt.data[37:39])[0]
+        print(self._user.state)
         self._user.state.inRoom = 0
         self._user.state.noLobbyChat = 0
         self._user.state.room = None
         self._user.state.teamId = 0
+        print(self._user.state)
         log.msg('self._user: %s, state: %s' % (
                 self._user.profile.name, self._user.state))
         self.sendZeros(0x4203,4)
@@ -734,7 +749,7 @@ class NetworkMenuService(LoginService):
         # notify all in the lobby
         stats = yield self.getStats(self._user.profile.id)
         data = self.formatPlayerInfo(self._user, 0, stats)
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             usr.sendData(0x4220, data)
         # send chat history
         reactor.callLater(
@@ -743,7 +758,7 @@ class NetworkMenuService(LoginService):
     def getUserList_4210(self, pkt):
         self.sendZeros(0x4211,4)
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             if usr.state.inRoom == 1:
                 roomId = usr.state.room.id
             else:
@@ -755,14 +770,14 @@ class NetworkMenuService(LoginService):
     def getRoomList_4300(self, pkt):
         self.sendZeros(0x4301,4)
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-        for room in thisLobby.rooms.itervalues():
+        for room in thisLobby.rooms.values():
             n = len(room.players)
             data = b'%s%s%s%s%s%s%s' % (
                     struct.pack('!i',room.id),
                     struct.pack('!B',1),
                     struct.pack('!B',int(room.usePassword)),
                     util.padWithZeros(room.name,32),
-                    struct.pack('!B',room.matchTime/5),
+                    struct.pack('!B',int(room.matchTime/5)),
                     b''.join([struct.pack('!i',usr.profile.id) 
                             for usr in room.players]),
                     b'\0'*(48-n*4))
@@ -813,7 +828,7 @@ class NetworkMenuService(LoginService):
                     self._user.profile.name, self._user.state.lobbyId+1))
             thisLobby.exit(self._user)
             # notify every remaining occupant in the lobby
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 usr.sendData(0x4221,struct.pack('!i',self._user.profile.id))
              
     def disconnect_0003(self, pkt):
@@ -829,7 +844,7 @@ class NetworkMenuService(LoginService):
             # user now considered OFFLINE
             self.factory.userOffline(self._user)
             # notify every remaining occupant in the lobby
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 usr.sendData(0x4221,struct.pack('!i',self._user.profile.id))
  
     def register(self):
@@ -876,21 +891,21 @@ class MainService(NetworkMenuService):
         thisLobby.addRoom(room)
         log.msg('Room created: %s' % repr(room))
         # notify all users in the lobby about the new room
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             n = len(room.players)
             data = b'%s%s%s%s%s%s%s' % (
                     struct.pack('!i',room.id),
                     struct.pack('!B',1),
                     struct.pack('!B',int(room.usePassword)),
                     util.padWithZeros(room.name,32),
-                    struct.pack('!B',room.matchTime/5),
+                    struct.pack('!B',int(room.matchTime/5)),
                     b''.join([b'%s\0\0\0\0\0\0\0' % struct.pack(
                         '!i',x.profile.id) 
                         for x in room.players]),
                     b'\0'*(48-n*11))
             usr.sendData(0x4306,data)
         # notify all users in the lobby that player is now in a room
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             data = self.formatPlayerInfo(self._user, room.id)
             usr.sendData(0x4222,data)
         self.sendZeros(0x4311,4)
@@ -911,14 +926,14 @@ class MainService(NetworkMenuService):
                 self._user.needsLobbyChatReplay = True
             # send room info update
             thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 n = len(room.players)
                 data = b'%s%s%s%s%s%s%s' % (
                         struct.pack('!i',room.id), 
                         struct.pack('!B',1),
                         struct.pack('!B',int(room.usePassword)),
                         util.padWithZeros(room.name,32),
-                        struct.pack('!B',room.matchTime/5),
+                        struct.pack('!B',int(room.matchTime/5)),
                         b''.join([b'%s%s\0\0\0\0\0' % (
                                     struct.pack('!i',x.profile.id),
                                     struct.pack('!H',x.state.teamId)) 
@@ -927,7 +942,7 @@ class MainService(NetworkMenuService):
                 usr.sendData(0x4306,data)
             # notify all users in the lobby that 
             # player is now back in lobby (not in room)
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 data = self.formatPlayerInfo(self._user, room.id)
                 usr.sendData(0x4222,data)
             self.sendZeros(0x432b,4)
@@ -935,7 +950,7 @@ class MainService(NetworkMenuService):
             if room.isEmpty():
                 # notify users in lobby that the room is gone
                 data = struct.pack('!i',room.id)
-                for usr in thisLobby.players.itervalues():
+                for usr in thisLobby.players.values():
                     usr.sendData(0x4305,data)
                 thisLobby.deleteRoom(room)
             # re-send chat history if needed
@@ -946,21 +961,21 @@ class MainService(NetworkMenuService):
                     thisLobby, self._user)
  
     def setMatchTime_4364(self, pkt):
-        matchTime = struct.unpack('!B',pkt.data[0])[0] * 5
+        matchTime = struct.unpack('!B',pkt.data[0:1])[0] * 5
         log.debug('Match time: %d' % matchTime)
         room = self._user.state.room
         if room:
             room.matchTime = matchTime
             # send room info update
             thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 n = len(room.players)
                 data = b'%s%s%s%s%s%s%s' % (
                         struct.pack('!i',room.id), 
                         struct.pack('!B',1),
                         struct.pack('!B',int(room.usePassword)),
                         util.padWithZeros(room.name,32),
-                        struct.pack('!B',room.matchTime/5),
+                        struct.pack('!B',int(room.matchTime/5)),
                         b''.join([b'%s%s\0\0\0\0\0' % (
                                     struct.pack('!i',x.profile.id),
                                     struct.pack('!H',x.state.teamId)) 
@@ -989,7 +1004,7 @@ class MainService(NetworkMenuService):
 
     def goalScored_4368(self, pkt):
         room = self._user.state.room
-        if pkt.data[0] == '\0':
+        if pkt.data[0] == b'\0':
             log.msg('GOAL SCORED by HOME team %d (%s)' % (
                 room.match.home_team_id, room.match.home_profile.name))
             room.match.score_home += 1
@@ -1008,7 +1023,7 @@ class MainService(NetworkMenuService):
         room = self._user.state.room
         if room is not None and room.match is not None:
             exitType = struct.unpack('!B', pkt.data[1])[0]
-            if pkt.data[0] == '\0':
+            if pkt.data[0] == b'\0':
                 room.match.home_exit = exitType
             else:
                 room.match.away_exit = exitType
@@ -1016,29 +1031,29 @@ class MainService(NetworkMenuService):
 
     def chat_4400(self, pkt):
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-        chatType = pkt.data[0]
+        chatType = pkt.data[0:2]
         message = util.stripZeros(pkt.data[10:])
         data = b'%s%s%s%s%s' % (
-                chatType,
+                chatType[0:1],
                 pkt.data[2:6],
                 struct.pack('!i',self._user.profile.id),
                 util.padWithZeros(self._user.profile.name,16),
                 #util.padWithZeros(message, 128))
                 message[:126]+b'\0\0')
-        if chatType==b'\x00' and pkt.data[1]==b'\x01':
+        if chatType==b'\x00\x01':
             # add to lobby chat history
             thisLobby.addToChatHistory(
-                lobby.ChatMessage(self._user.profile, message))
+                lobby.ChatMessage(self._user.profile, message.decode('utf-8')))
             # lobby chat
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 usr.sendData(0x4402, data)
-        elif chatType==b'\x01' and pkt.data[1]==b'\x02':
+        elif chatType==b'\x01\x02':
             # room chat
             room = self._user.state.room
             if room:
                 for usr in room.players:
                     usr.sendData(0x4402, data)
-        elif chatType==b'\x00' and pkt.data[1]==b'\x02':
+        elif chatType==b'\x00\x02':
             # private message
             profileId = struct.unpack('!i',pkt.data[6:10])[0]
             usr = thisLobby.getPlayerByProfileId(profileId)
@@ -1046,7 +1061,7 @@ class MainService(NetworkMenuService):
                 # add to lobby chat history
                 thisLobby.addToChatHistory(
                     lobby.ChatMessage(
-                        self._user.profile, message, usr.profile,
+                        self._user.profile, message.decode('utf-8'), usr.profile,
                         pkt.data[2:6]))
                 usr.sendData(0x4402, data)
                 if usr != self._user:
@@ -1115,14 +1130,14 @@ class MainService(NetworkMenuService):
                 room.owner.sendData(0x4324, b'\0'*4)
             # send room info update
             thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 n = len(room.players)
                 data = b'%s%s%s%s%s%s%s' % (
                         struct.pack('!i',room.id), 
                         struct.pack('!B',1),
                         struct.pack('!B',int(room.usePassword)),
                         util.padWithZeros(room.name,32),
-                        struct.pack('!B',room.matchTime/5),
+                        struct.pack('!B',int(room.matchTime/5)),
                         b''.join([b'%s%s\0\0\0\0\0' % (
                                     struct.pack('!i',x.profile.id),
                                     struct.pack('!H',x.state.teamId)) 
@@ -1131,7 +1146,7 @@ class MainService(NetworkMenuService):
                 usr.sendData(0x4306,data)
             # notify all users in the lobby that 
             # player is now back in lobby (not in room)
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 data = self.formatPlayerInfo(self._user, room.id)
                 usr.sendData(0x4222,data)
             self.sendZeros(0x4326,4)
@@ -1139,7 +1154,7 @@ class MainService(NetworkMenuService):
             if room.isEmpty():
                 # notify users in lobby that the room is gone
                 data = struct.pack('!i',room.id)
-                for usr in thisLobby.players.itervalues():
+                for usr in thisLobby.players.values():
                     usr.sendData(0x4305,data)
                 thisLobby.deleteRoom(room)
  
@@ -1169,14 +1184,14 @@ class MainService(NetworkMenuService):
                 room.enter(self._user)
 
                 # notify people in lobby about change
-                for otherUsr in thisLobby.players.itervalues():
+                for otherUsr in thisLobby.players.values():
                     n = len(room.players)
                     data = b'%s%s%s%s%s%s%s' % (
                             struct.pack('!i',room.id),
                             struct.pack('!B',1),
                             struct.pack('!B',int(room.usePassword)),
                             util.padWithZeros(room.name,32),
-                            struct.pack('!B',room.matchTime/5),
+                            struct.pack('!B',int(room.matchTime/5)),
                             b''.join([b'%s%s\0\0\0\0\0' % (
                                         struct.pack('!i',x.profile.id),
                                         struct.pack('!H',x.state.teamId)) 
@@ -1184,7 +1199,7 @@ class MainService(NetworkMenuService):
                             b'\0'*(48-n*4))
                     otherUsr.sendData(0x4306,data)
                 # notify all users in the lobby that player is now in a room
-                for otherUsr in thisLobby.players.itervalues():
+                for otherUsr in thisLobby.players.values():
                     data = self.formatPlayerInfo(self._user, room.id)
                     otherUsr.sendData(0x4222,data)
                  
@@ -1203,7 +1218,7 @@ class MainService(NetworkMenuService):
         defer.returnValue(None)
 
     def challengeResponse_4323(self, pkt):
-        accepted = (struct.unpack('!B', pkt.data[0])[0] == 1)
+        accepted = (struct.unpack('!B', pkt.data[0:1])[0] == 1)
         if accepted:
             # send response to challenger ("ultimate packet")
             challenger = self._user.challenger
@@ -1221,7 +1236,7 @@ class MainService(NetworkMenuService):
             self._user.state.noLobbyChat = 0#0xff
             challenger.state.noLobbyChat = 0#0xff
             thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 data = self.formatPlayerInfo(self._user, room.id)
                 usr.sendData(0x4222, data)
                 data = self.formatPlayerInfo(challenger, room.id)
@@ -1232,14 +1247,14 @@ class MainService(NetworkMenuService):
             room.exit(challenger)
             # notify people in lobby about change
             thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-            for otherUsr in thisLobby.players.itervalues():
+            for otherUsr in thisLobby.players.values():
                 n = len(room.players)
                 data = b'%s%s%s%s%s%s%s' % (
                         struct.pack('!i',room.id),
                         struct.pack('!B',1),
                         struct.pack('!B',int(room.usePassword)),
                         util.padWithZeros(room.name,32),
-                        struct.pack('!B',room.matchTime/5),
+                        struct.pack('!B',int(room.matchTime/5)),
                         b''.join([b'%s%s\0\0\0\0\0' % (
                                     struct.pack('!i',x.profile.id),
                                     struct.pack('!H',x.state.teamId)) 
@@ -1247,7 +1262,7 @@ class MainService(NetworkMenuService):
                         b'\0'*(48-n*4))
                 otherUsr.sendData(0x4306,data)
             # notify all users in the lobby about player
-            for otherUsr in thisLobby.players.itervalues():
+            for otherUsr in thisLobby.players.values():
                 data = self.formatPlayerInfo(challenger, 0)
                 otherUsr.sendData(0x4222,data)
             # send response to challenger
@@ -1261,7 +1276,7 @@ class MainService(NetworkMenuService):
                 usr.sendData(0x4350, pkt.data)
 
     def toggleReady_4360(self, pkt):
-        ready = (struct.unpack('!B', pkt.data[0])[0] == 1)
+        ready = (struct.unpack('!B', pkt.data[0:1])[0] == 1)
         # relay to others in the room
         room = self._user.state.room
         if room:

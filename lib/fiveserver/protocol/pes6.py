@@ -83,7 +83,7 @@ class NewsProtocol(pes5.NewsProtocol):
             (-1,2,'LOGIN',serverIP,
              self.factory.serverConfig.NetworkServer['loginService'][gameName],
              0,2),
-            (-1,3,self.SERVER_NAME.encode('utf-8'),serverIP,
+            (-1,3,self.SERVER_NAME,serverIP,
              self.factory.serverConfig.NetworkServer['mainService'],
              max(0, self.factory.getNumUsersOnline()-1),3),
             (-1,8,'NETWORK_MENU',serverIP,
@@ -93,8 +93,8 @@ class NewsProtocol(pes5.NewsProtocol):
         data = b''.join(['%s%s%s%s%s%s%s' % (
                 struct.pack('!i',a),
                 struct.pack('!i',b),
-                b'%s%s' % (name.encode('utf-8'),'\0'*(32-len(name[:32]))),
-                b'%s%s' % (ip.encode('utf-8'),'\0'*(15-len(ip))),
+                b'%s%s' % (name.encode('utf-8'),b'\0'*(32-len(name[:32]))),
+                b'%s%s' % (ip.encode('utf-8'),b'\0'*(15-len(ip))),
                 struct.pack('!H',port),
                 struct.pack('!H',c),
                 struct.pack('!H',d)) for a,b,name,ip,port,c,d in servers])
@@ -139,15 +139,15 @@ class LoginService(RosterHandler, pes5.LoginService):
         data = b'\0'*4 + b''.join([
             b'%(index)s%(id)s%(name)s%(playTime)s'
             b'%(division)s%(points)s%(rating)s%(games)s' % {
-                'index':struct.pack('!B', i),
-                'id':struct.pack('!i', profile.id),
-                'name':util.padWithZeros(profile.name, 48),
-                'division':struct.pack('!B', 
+                b'index':struct.pack('!B', i),
+                b'id':struct.pack('!i', profile.id),
+                b'name':util.padWithZeros(profile.name, 48),
+                b'division':struct.pack('!B', 
                     self.factory.ratingMath.getDivision(profile.points)),
-                'playTime':struct.pack('!i', profile.playTime.total_seconds()),
-                'points':struct.pack('!i', profile.points),
-                'games':struct.pack('!H', games),
-                'rating':struct.pack('!H',profile.rating),
+                b'playTime':struct.pack('!i', int(profile.playTime.total_seconds())),
+                b'points':struct.pack('!i', profile.points),
+                b'games':struct.pack('!H', games),
+                b'rating':struct.pack('!H',profile.rating),
                 } 
             for (_, games), (i, profile) in zip(
                 results, enumerate(profiles))])
@@ -218,22 +218,22 @@ class MainService(RosterHandler, pes5.MainService):
                 b'%(groupmemberstatus)s%(division)s%(roomid)s'
                 b'%(points)s%(rating)s%(matches)s%(wins)s'
                 b'%(losses)s%(draws)s%(pad1)s' % {
-            'id': struct.pack('!i',usr.profile.id),
-            'name': util.padWithZeros(usr.profile.name,48),
-            'groupid': struct.pack('!i',0),
-            'groupname': b'\0'*48,
-            'groupmemberstatus': struct.pack('!B',0),
-            'division': struct.pack('!B', 
+            b'id': struct.pack('!i',usr.profile.id),
+            b'name': util.padWithZeros(usr.profile.name,48),
+            b'groupid': struct.pack('!i',0),
+            b'groupname': b'\0'*48,
+            b'groupmemberstatus': struct.pack('!B',0),
+            b'division': struct.pack('!B', 
                 self.factory.ratingMath.getDivision(usr.profile.points)),
-            'roomid': struct.pack('!i',roomId),
-            'points': struct.pack('!i',usr.profile.points),
-            'rating': struct.pack('!H',0),
-            'matches': struct.pack('!H',
+            b'roomid': struct.pack('!i',roomId),
+            b'points': struct.pack('!i',usr.profile.points),
+            b'rating': struct.pack('!H',0),
+            b'matches': struct.pack('!H',
                 stats.wins + stats.losses + stats.draws),
-            'wins': struct.pack('!H',stats.wins),
-            'losses': struct.pack('!H',stats.losses),
-            'draws': struct.pack('!H',stats.draws),
-            'pad1': b'\0'*3,
+            b'wins': struct.pack('!H',stats.wins),
+            b'losses': struct.pack('!H',stats.losses),
+            b'draws': struct.pack('!H',stats.draws),
+            b'pad1': b'\0'*3,
         })
 
     def formatProfileInfo(self, profile, stats):
@@ -251,38 +251,38 @@ class MainService(RosterHandler, pes5.MainService):
                     b'%(winnerscup-gold-medals)s%(winnerscup-silver-medals)s'
                     b'%(unknown2)s%(unknown3)s'
                     b'%(language)s%(recent-used-teams)s' % {
-                'id': struct.pack('!i',profile.id),
-                'name': util.padWithZeros(profile.name,48),
-                'groupid': struct.pack('!i',0),
-                'groupname': util.padWithZeros('Playmakers',48),
-                'groupmemberstatus': struct.pack('!B',1),
-                'division': struct.pack('!B', 
+                b'id': struct.pack('!i',profile.id),
+                b'name': util.padWithZeros(profile.name,48),
+                b'groupid': struct.pack('!i',0),
+                b'groupname': util.padWithZeros('Playmakers',48),
+                b'groupmemberstatus': struct.pack('!B',1),
+                b'division': struct.pack('!B', 
                     self.factory.ratingMath.getDivision(profile.points)),
-                'points': struct.pack('!i',profile.points),
-                'rating': struct.pack('!H',profile.rating),
-                'matches': struct.pack('!H',
+                b'points': struct.pack('!i',profile.points),
+                b'rating': struct.pack('!H',profile.rating),
+                b'matches': struct.pack('!H',
                     stats.wins + stats.losses + stats.draws),
-                'wins': struct.pack('!H',stats.wins),
-                'losses': struct.pack('!H',stats.losses),
-                'draws': struct.pack('!H',stats.draws),
-                'win-strk': struct.pack('!H', stats.streak_current),
-                'win-best': struct.pack('!H', stats.streak_best),
-                'disconnects': struct.pack(
+                b'wins': struct.pack('!H',stats.wins),
+                b'losses': struct.pack('!H',stats.losses),
+                b'draws': struct.pack('!H',stats.draws),
+                b'win-strk': struct.pack('!H', stats.streak_current),
+                b'win-best': struct.pack('!H', stats.streak_best),
+                b'disconnects': struct.pack(
                     '!H', profile.disconnects),
-                'goals-scored': struct.pack('!i', stats.goals_scored),
-                'goals-allowed': struct.pack('!i', stats.goals_allowed),
-                'comment': util.padWithZeros((
+                b'goals-scored': struct.pack('!i', stats.goals_scored),
+                b'goals-allowed': struct.pack('!i', stats.goals_allowed),
+                b'comment': util.padWithZeros((
                     profile.comment or 'Fiveserver rules!'), 256),
-                'rank': struct.pack('!i',profile.rank),
-                'competition-gold-medals': struct.pack('!H', 0),
-                'competition-silver-medals': struct.pack('!H', 0),
-                'unknown1': struct.pack('!H', 0),
-                'winnerscup-gold-medals': struct.pack('!H', 0),
-                'winnerscup-silver-medals': struct.pack('!H', 0),
-                'unknown2': struct.pack('!H', 0),
-                'unknown3': struct.pack('!B', 0),
-                'language': struct.pack('!B', 0),
-                'recent-used-teams': b''.join([struct.pack('!H', team) 
+                b'rank': struct.pack('!i',profile.rank),
+                b'competition-gold-medals': struct.pack('!H', 0),
+                b'competition-silver-medals': struct.pack('!H', 0),
+                b'unknown1': struct.pack('!H', 0),
+                b'winnerscup-gold-medals': struct.pack('!H', 0),
+                b'winnerscup-silver-medals': struct.pack('!H', 0),
+                b'unknown2': struct.pack('!H', 0),
+                b'unknown3': struct.pack('!B', 0),
+                b'language': struct.pack('!B', 0),
+                b'recent-used-teams': b''.join([struct.pack('!H', team) 
                     for team in stats.teams]) + b'\xff\xff'*(5-len(stats.teams)) 
             })
             
@@ -313,7 +313,7 @@ class MainService(RosterHandler, pes5.MainService):
             awayGoalsEt1 = room.match.score_away_et1
             awayGoalsEt2 = room.match.score_away_et2
             awayGoalsPen = room.match.score_away_pen
-        return '%s%s%s%s%s%s%s%s%s%s%s%s' % (
+        return b'%s%s%s%s%s%s%s%s%s%s%s%s' % (
             struct.pack('!H', homeTeam),
             struct.pack('!B', homeGoals1st), # 1st
             struct.pack('!B', homeGoals2nd), # 2nd
@@ -334,13 +334,13 @@ class MainService(RosterHandler, pes5.MainService):
             match_clock = room.match.clock
         else:
             match_state, match_clock = 0, 0
-        return '%s%s%s%s%s%s%s%s%s%s%s' % (
+        return b'%s%s%s%s%s%s%s%s%s%s%s' % (
             struct.pack('!i',room.id),
             struct.pack('!B',room.phase),
             struct.pack('!B',match_state),
             util.padWithZeros(room.name,64),
             struct.pack('!B',match_clock),
-            ''.join(['%s%s%s%s%s%s%s' % (
+            b''.join([b'%s%s%s%s%s%s%s' % (
                 struct.pack('!i',usr.profile.id),
                 struct.pack('!B',room.isOwner(usr)),
                 # matchstarter or 1st host?
@@ -350,11 +350,11 @@ class MainService(RosterHandler, pes5.MainService):
                 struct.pack('!B',room.getPlayerPosition(usr)), # pos in room
                 struct.pack('!B',room.getPlayerParticipate(usr))) # participate
                 for usr in room.players]),
-            '\0\0\0\0\0\0\xff\0\0\xff'*(4-n), # empty players
+            b'\0\0\0\0\0\0\xff\0\0\xff'*(4-n), # empty players
             self.formatTeamsAndGoals(room),
-            '\0', #padding
+            b'\0', #padding
             struct.pack('!B', int(room.usePassword)), # room locked
-            '\0\x02\0\0') # competition flag, match chat setting, 2 unknowns
+            b'\0\x02\0\0') # competition flag, match chat setting, 2 unknowns
             
     def formatRoomParticipationStatus(self, room):
         """
@@ -362,13 +362,13 @@ class MainService(RosterHandler, pes5.MainService):
         """
         
         n = len(room.players)
-        data = '%s%s' % (
-            ''.join(['%s%s%s' % (
+        data = b'%s%s' % (
+            b''.join(['%s%s%s' % (
                 struct.pack('!i',usr.profile.id),
                 struct.pack('!B',room.getPlayerPosition(usr)),
                 struct.pack('!B',room.getPlayerParticipate(usr)))
                 for usr in room.players]),
-            '\0\0\0\0\0\xff'*(4-n))
+            b'\0\0\0\0\0\xff'*(4-n))
         return data        
 
     def becomeSpectator_4366(self, pkt):
@@ -433,14 +433,14 @@ class MainService(RosterHandler, pes5.MainService):
                 data = (b'%(pad1)s%(ip1)s%(port1)s'
                     b'%(ip2)s%(port2)s%(id)s'
                     b'%(someField)s%(participate)s') % {
-                'pad1': b'\0'*32,
-                'ip1': util.padWithZeros(usr.state.ip1, 16),
-                'port1': struct.pack('!H', usr.state.udpPort1),
-                'ip2': util.padWithZeros(usr.state.ip2, 16),
-                'port2': struct.pack('!H', usr.state.udpPort2),
-                'id': struct.pack('!i', usr.profile.id),
-                'someField': struct.pack('!H', 0),
-                'participate': struct.pack('!B', 
+                b'pad1': b'\0'*32,
+                b'ip1': util.padWithZeros(usr.state.ip1, 16),
+                b'port1': struct.pack('!H', usr.state.udpPort1),
+                b'ip2': util.padWithZeros(usr.state.ip2, 16),
+                b'port2': struct.pack('!H', usr.state.udpPort2),
+                b'id': struct.pack('!i', usr.profile.id),
+                b'someField': struct.pack('!H', 0),
+                b'participate': struct.pack('!B', 
                     room.getPlayerParticipate(usr)),
                 }
                 self.sendData(0x4347, data)
@@ -461,9 +461,9 @@ class MainService(RosterHandler, pes5.MainService):
         if chatType==b'\x00\x01':
             # add to lobby chat history
             thisLobby.addToChatHistory(
-                lobby.ChatMessage(self._user.profile, message))
+                lobby.ChatMessage(self._user.profile, message.decode('utf-8')))
             # lobby chat
-            for usr in thisLobby.players.itervalues():
+            for usr in thisLobby.players.values():
                 usr.sendData(0x4402, data)
         elif chatType==b'\x01\x08':
             # room chat
@@ -479,7 +479,7 @@ class MainService(RosterHandler, pes5.MainService):
                 # add to lobby chat history
                 thisLobby.addToChatHistory(
                     lobby.ChatMessage(
-                        self._user.profile, message, usr.profile,
+                        self._user.profile, message.decode('utf-8'), usr.profile,
                         pkt.data[2:6]))
                 usr.sendData(0x4402, data)
                 if usr != self._user:
@@ -523,7 +523,7 @@ class MainService(RosterHandler, pes5.MainService):
 
     def broadcastSystemChat(self, aLobby, text):
         chatMessage = lobby.ChatMessage(lobby.SYSTEM_PROFILE, text)
-        for usr in aLobby.players.itervalues():
+        for usr in aLobby.players.values():
             data = b'%s%s%s%s%s' % (
                     b'\0\1',
                     b'\0\0\0\0',
@@ -547,7 +547,7 @@ class MainService(RosterHandler, pes5.MainService):
     def sendRoomUpdate(self, room):
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
         data = self.formatRoomInfo(room)
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             usr.sendData(0x4306,data)
 
     @defer.inlineCallbacks
@@ -555,14 +555,14 @@ class MainService(RosterHandler, pes5.MainService):
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
         stats = yield self.getStats(self._user.profile.id)
         data = self.formatPlayerInfo(self._user, roomId, stats)
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             usr.sendData(0x4222,data)
 
     @defer.inlineCallbacks
     def getUserList_4210(self, pkt):
         self.sendZeros(0x4211,4)
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-        for usr in thisLobby.players.itervalues():
+        for usr in thisLobby.players.values():
             if usr.state.inRoom == 1:
                 roomId = usr.state.room.id
             else:
@@ -599,7 +599,7 @@ class MainService(RosterHandler, pes5.MainService):
     def getRoomList_4300(self, pkt):
         self.sendZeros(0x4301,4)
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
-        for room in thisLobby.rooms.itervalues():
+        for room in thisLobby.rooms.values():
             data = self.formatRoomInfo(room)
             self.sendData(0x4302, data)
         self.sendZeros(0x4303,4)
@@ -646,14 +646,14 @@ class MainService(RosterHandler, pes5.MainService):
             data = (b'%(pad1)s%(ip1)s%(port1)s'
             b'%(ip2)s%(port2)s%(id)s'
             b'%(someField)s%(participate)s') % {
-            'pad1': b'\0'*36,
-            'ip1': util.padWithZeros(self._user.state.ip1, 16),
-            'port1': struct.pack('!H', self._user.state.udpPort1),
-            'ip2': util.padWithZeros(self._user.state.ip2, 16),
-            'port2': struct.pack('!H', self._user.state.udpPort2),
-            'id': struct.pack('!i', self._user.profile.id),
-            'someField': struct.pack('!H', 0),
-            'participate': struct.pack('!B', 
+            b'pad1': b'\0'*36,
+            b'ip1': util.padWithZeros(self._user.state.ip1, 16),
+            b'port1': struct.pack('!H', self._user.state.udpPort1),
+            b'ip2': util.padWithZeros(self._user.state.ip2, 16),
+            b'port2': struct.pack('!H', self._user.state.udpPort2),
+            b'id': struct.pack('!i', self._user.profile.id),
+            b'someField': struct.pack('!H', 0),
+            b'participate': struct.pack('!B', 
                 room.getPlayerParticipate(self._user)),
             }
             otherUsr.sendData(0x4330, data)        
@@ -694,14 +694,14 @@ class MainService(RosterHandler, pes5.MainService):
             data = (b'%(pad1)s%(ip1)s%(port1)s'
             b'%(ip2)s%(port2)s%(id)s'
             b'%(someField)s%(participate)s') % {
-            'pad1': '\0'*32,
-            'ip1': util.padWithZeros(otherUsr.state.ip1, 16),
-            'port1': struct.pack('!H', otherUsr.state.udpPort1),
-            'ip2': util.padWithZeros(otherUsr.state.ip2, 16),
-            'port2': struct.pack('!H', otherUsr.state.udpPort2),
-            'id': struct.pack('!i', otherUsr.profile.id),
-            'someField': struct.pack('!H', 0),
-            'participate': struct.pack('!B', 
+            b'pad1': b'\0'*32,
+            b'ip1': util.padWithZeros(otherUsr.state.ip1, 16),
+            b'port1': struct.pack('!H', otherUsr.state.udpPort1),
+            b'ip2': util.padWithZeros(otherUsr.state.ip2, 16),
+            b'port2': struct.pack('!H', otherUsr.state.udpPort2),
+            b'id': struct.pack('!i', otherUsr.profile.id),
+            b'someField': struct.pack('!H', 0),
+            b'participate': struct.pack('!B', 
                 room.getPlayerParticipate(otherUsr)),
             }
             self.sendData(0x4347, data)
@@ -713,7 +713,7 @@ class MainService(RosterHandler, pes5.MainService):
         # user now considered OFFLINE
         self.factory.userOffline(usr)
         # notify every remaining occupant in the lobby
-        for otherUsr in usrLobby.players.itervalues():
+        for otherUsr in usrLobby.players.values():
             otherUsr.sendData(0x4221,struct.pack('!i', usr.profile.id))
  
     def exitingRoom(self, room, usr):
@@ -729,7 +729,7 @@ class MainService(RosterHandler, pes5.MainService):
         if room.isEmpty():
             # notify users in lobby that the room is gone
             data = struct.pack('!i',room.id)
-            for otherUsr in usrLobby.players.itervalues():
+            for otherUsr in usrLobby.players.values():
                 otherUsr.sendData(0x4305,data)
             usrLobby.deleteRoom(room)
 
@@ -742,7 +742,7 @@ class MainService(RosterHandler, pes5.MainService):
                 self._user.state.room, self._user)
   
     def toggleParticipate_4363(self, pkt):
-        participate = (struct.unpack('!B', pkt.data[0])[0] == 1)
+        participate = (struct.unpack('!B', pkt.data[0:1])[0] == 1)
         room = self._user.state.room
         packetPayload = b'\0\0\0\0' # success
         if room:
@@ -765,7 +765,7 @@ class MainService(RosterHandler, pes5.MainService):
                     log.msg(text)
                     self.broadcastRoomChat(room, text.encode('utf-8'))
                 elif room.isForcedCancelledParticipation(self._user):
-                    packetPayload = '\xff\xff\xfd\xb6' # still cancelled
+                    packetPayload = b'\xff\xff\xfd\xb6' # still cancelled
                 else:
                     room.participate(self._user)
             else:
@@ -827,7 +827,7 @@ class MainService(RosterHandler, pes5.MainService):
             self.sendRoomUpdate(room)
         
     def toggleReady_436f(self, pkt):
-        payload = struct.unpack('!B', pkt.data[0])[0]
+        payload = struct.unpack('!B', pkt.data[0:1])[0]
         room = self._user.state.room
         if room:
             # phase 2-6: match not really started
@@ -885,7 +885,7 @@ class MainService(RosterHandler, pes5.MainService):
         room.teamSelection = lobby.TeamSelection()
         for x in range(4):
             profile_id = struct.unpack('!i',pkt.data[x*8:x*8+4])[0]
-            away = '\x01'==pkt.data[x*8+4]
+            away = b'\x01'==pkt.data[x*8+4]
             if profile_id!=0:
                 profile = yield self.factory.getPlayerProfile(profile_id)
                 if x in [0,1]:
@@ -915,7 +915,7 @@ class MainService(RosterHandler, pes5.MainService):
         if not room.match:
             log.msg('ERROR: Goal reported, but no match in the room.')
         else:
-            if pkt.data[0] == '\0':
+            if pkt.data[0] == b'\0':
                 log.msg('GOAL SCORED by HOME team %d (%s)' % (
                     room.teamSelection.home_team_id, 
                     getHomePlayerNames(room.match)))
@@ -937,7 +937,7 @@ class MainService(RosterHandler, pes5.MainService):
         self.sendRoomUpdate(room)
 
     def matchClockUpdate_4385(self, pkt):
-        clock = struct.unpack('!B', pkt.data[0])[0]
+        clock = struct.unpack('!B', pkt.data[0:1])[0]
         room = self._user.state.room
         if not room or not room.match:
             log.msg('ERROR: got clock update, but no match')
@@ -987,7 +987,7 @@ class MainService(RosterHandler, pes5.MainService):
             yield defer.succeed(None)
 
     def matchStateUpdate_4377(self, pkt):
-        state = struct.unpack('!B', pkt.data[0])[0]
+        state = struct.unpack('!B', pkt.data[0:1])[0]
         room = self._user.state.room
         if not room or not room.teamSelection:
             log.msg(

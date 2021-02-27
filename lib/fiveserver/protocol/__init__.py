@@ -37,7 +37,7 @@ class PacketReceiver(Protocol):
 
     def connectionMade(self):
         #print dir(self)
-        self._recvd = ""
+        self._recvd = b""
         self._count = 1
 
     def connectionLost(self, reason):
@@ -88,7 +88,7 @@ class PacketReceiver(Protocol):
         self.packetReceived(pkt)
 
     def sendZeros(self, id, length):
-        self.sendData(id, '\0'*length)
+        self.sendData(id, b'\0'*length)
         
     def sendData(self, id, data):
         self.send(

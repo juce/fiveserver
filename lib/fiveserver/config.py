@@ -438,7 +438,7 @@ class FiveServerConfig:
             pass
 
     def isUserOnline(self, usr):
-        return self.onlineUsers.has_key(usr.hash)
+        return usr.hash in self.onlineUsers
 
     def getUserInfo(self, usr):
         return self._latestUserInfo[usr.username]

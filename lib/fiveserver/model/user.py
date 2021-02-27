@@ -80,11 +80,11 @@ class UserState:
     IP-addresses, ports, lobby Id, etc.
     """
 
-    def tostr(self, v):
-        return util.stripZeros(bytes(v)).decode('utf-8')
+    #def tostr(self, v):
+    #    return util.stripZeros(str(v)).decode('utf-8')
 
     def __repr__(self):
-        return 'UserState(%s)' % ','.join(["%s=%s" % (k,self.tostr(v)) 
+        return 'UserState(%s)' % ','.join(["%s=%s" % (k,v) 
                 for k,v in self.__dict__.items()])
 
 

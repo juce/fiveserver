@@ -14,10 +14,12 @@ def stripZeros(s):
 
 
 def padWithZeros(s, total):
+    print("padWithZeros(s):",s)
     if isinstance(s, str):
         s = s.encode('utf-8', 'replace')
     ns = s[:total]
     ns += b'\0'*(total-len(ns))
+    print("padWithZeros(ns):",ns)
     return ns
 
 
@@ -56,8 +58,8 @@ class PacketFormatter:
                 chunk = data[i:]
             else:
                 chunk = data[i:i+PacketFormatter.NUM_CHARS_IN_LINE] 
-            hexstr = ' '.join(['%02x' % ord(c) for c in chunk])
-            asciistr = re.sub(r"""[^\w .,!?'"/<>-]""",'.',chunk)
+            hexstr = ' '.join(['%02x' % c for c in chunk])
+            asciistr = re.sub(r"""[^\w .,!?'"/<>-]""".encode('utf-8'),b'.',chunk)
             padding = '   '*(PacketFormatter.NUM_CHARS_IN_LINE-len(chunk))
             lines.append('%s%s  %s' % (hexstr, padding, asciistr))
             i += PacketFormatter.NUM_CHARS_IN_LINE 
