@@ -89,8 +89,6 @@ class Packet:
     def __init__(self, header, data):
         self.header = header
         self.data = data
-        print("self.header:", self.header)
-        print("self.data:", self.data)
         self.md5 = hashlib.md5(b'%s%s' % (header,data))
         
     def __bytes__(self):

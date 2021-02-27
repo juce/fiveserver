@@ -14,12 +14,10 @@ def stripZeros(s):
 
 
 def padWithZeros(s, total):
-    print("padWithZeros(s):",s)
     if isinstance(s, str):
         s = s.encode('utf-8', 'replace')
     ns = s[:total]
     ns += b'\0'*(total-len(ns))
-    print("padWithZeros(ns):",ns)
     return ns
 
 

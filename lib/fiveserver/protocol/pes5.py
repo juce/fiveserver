@@ -246,7 +246,6 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def getProfiles_3010(self, pkt):
-        print("getting profiles...")
         if self.factory.serverConfig.ShowStats:
             results = yield defer.DeferredList([
                 self.factory.matchData.getGames(
@@ -258,8 +257,6 @@ class LoginService(PacketDispatcher):
                 for profile in self._user.profiles])
             profiles = [self.makePristineProfile(profile) 
                 for profile in self._user.profiles]
-        print("results:",results)
-        print("profiles:",profiles)
         data = b'\0'*4 + b''.join([
             b'%(index)s%(id)s%(name)s%(playTime)s'
             b'%(division)s%(points)s%(games)s' % {
@@ -273,21 +270,15 @@ class LoginService(PacketDispatcher):
                 b'games':struct.pack('!H', games)} 
             for (_, games), (i, profile) in zip(
                 results, enumerate(profiles))])
-        print("data:",data)
         self.sendData(0x3012, data)
         defer.returnValue(None)
 
     @defer.inlineCallbacks
     def createProfile_3020(self, pkt):
-        print("getting profile index ...")
         profileIndex = struct.unpack('!B',pkt.data[0:1])[0]  # 0-2
-        print("profileIndex:",profileIndex)
         playerName = util.stripZeros(pkt.data[1:])            # 16-char name
-        print("playerName:",playerName)
         playerName = playerName.decode('utf-8')
-        print("playerName:",playerName)
         profileNameExists = yield self.factory.profileNameExists(playerName)
-        print("profileNameExists:",profileNameExists)
         if profileNameExists:
             log.msg('ProfileNameExistsError: %s' % playerName)
             self.sendData(0x3022, struct.pack('!I',0xfffffefc))
@@ -721,21 +712,16 @@ class NetworkMenuService(LoginService):
     @defer.inlineCallbacks
     def selectLobby_4202(self, pkt):
         self._user.state = user.UserState()
-        print("making UserState ...")
         self._user.state.lobbyId = struct.unpack('!B',pkt.data[0:1])[0]
-        print(self._user.state)
         self._user.state.ip1 = pkt.data[1:17]
         self._user.state.ip2 = pkt.data[19:35]
-        print(self._user.state)
         self._user.state.udpPort1 = struct.unpack('!H',pkt.data[17:19])[0]
         self._user.state.udpPort2 = struct.unpack('!H',pkt.data[35:37])[0]
         self._user.state.someField = struct.unpack('!H',pkt.data[37:39])[0]
-        print(self._user.state)
         self._user.state.inRoom = 0
         self._user.state.noLobbyChat = 0
         self._user.state.room = None
         self._user.state.teamId = 0
-        print(self._user.state)
         log.msg('self._user: %s, state: %s' % (
                 self._user.profile.name, self._user.state))
         self.sendZeros(0x4203,4)
