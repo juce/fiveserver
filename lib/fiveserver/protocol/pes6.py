@@ -90,7 +90,7 @@ class NewsProtocol(pes5.NewsProtocol):
              self.factory.serverConfig.NetworkServer['networkMenuService'],
              0,8),
         ]
-        data = b''.join(['%s%s%s%s%s%s%s' % (
+        data = b''.join([b'%s%s%s%s%s%s%s' % (
                 struct.pack('!i',a),
                 struct.pack('!i',b),
                 b'%s%s' % (name.encode('utf-8'),b'\0'*(32-len(name[:32]))),
@@ -363,7 +363,7 @@ class MainService(RosterHandler, pes5.MainService):
         
         n = len(room.players)
         data = b'%s%s' % (
-            b''.join(['%s%s%s' % (
+            b''.join([b'%s%s%s' % (
                 struct.pack('!i',usr.profile.id),
                 struct.pack('!B',room.getPlayerPosition(usr)),
                 struct.pack('!B',room.getPlayerParticipate(usr)))
@@ -410,13 +410,13 @@ class MainService(RosterHandler, pes5.MainService):
                 struct.pack('!H',0)) # old rating
                 for usr in room.participatingPlayers]),
             b'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0'*(4-n),
-            b''.join(b'%s%s%s%s%s%s' % (
+            b''.join([b'%s%s%s%s%s%s' % (
                 struct.pack('!i',0), # group1 id
                 struct.pack('!H',0), # group1 added points
                 struct.pack('!i',0), # group1 new points
                 struct.pack('!i',0), # group2 id
                 struct.pack('!H',0), # group2 added points
-                struct.pack('!i',0)))) # group2 new points
+                struct.pack('!i',0))])) # group2 new points
         self.sendData(0x4384, data)
 
     def quickGameSearch_6020(self, pkt):
@@ -862,7 +862,7 @@ class MainService(RosterHandler, pes5.MainService):
                     continue
                 data = b'%s%s' % (
                     struct.pack('!i',self._user.profile.id),
-                    pkt.data[0])
+                    pkt.data[0:1])
                 usr.sendData(0x4371, data)
         self.sendZeros(0x4370,4)
 
@@ -885,7 +885,7 @@ class MainService(RosterHandler, pes5.MainService):
         room.teamSelection = lobby.TeamSelection()
         for x in range(4):
             profile_id = struct.unpack('!i',pkt.data[x*8:x*8+4])[0]
-            away = b'\x01'==pkt.data[x*8+4]
+            away = 1 == pkt.data[x*8+4]
             if profile_id!=0:
                 profile = yield self.factory.getPlayerProfile(profile_id)
                 if x in [0,1]:
@@ -1045,7 +1045,7 @@ class MainService(RosterHandler, pes5.MainService):
         if room:
             if pkt.data[0:4] == b'\0\0\1\3': #TODO clean this up (3 - phase?)
                 # extract info that we care about
-                room.matchTime = 5*(struct.unpack('!B', pkt.data[12])[0] + 1)
+                room.matchTime = 5*(struct.unpack('!B', pkt.data[12:13])[0] + 1)
                 log.msg('match time set to: %d minutes' % room.matchTime)
             # send to others
             for usr in self._user.state.room.players:
