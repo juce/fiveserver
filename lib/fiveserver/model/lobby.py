@@ -7,8 +7,7 @@ import struct
 import random
 
 from fiveserver import log
-import util
-import user
+from fiveserver.model import util, user
 
 
 MAX_MESSAGES = 50
@@ -44,17 +43,17 @@ class Lobby:
         self.roomOrdinal = 0
         self.chatHistory = list()
 
-    def __str__(self):
+    def __bytes__(self):
         """
         return serialized representation to be used in packets
         """
-        return '%s%s%s' % (
+        return b'%s%s%s' % (
                 struct.pack('!B',self.typeCode),
                 util.padWithZeros(self.name,32),
                 struct.pack('!H',len(self.players)))
 
     def getPlayerByProfileId(self, id):
-        for usr in self.players.itervalues():
+        for usr in self.players.values():
             if usr.profile.id == id:
                 return usr
         return None
@@ -110,7 +109,7 @@ class Lobby:
         return self.rooms[name]
 
     def getRoomById(self, roomId):
-        for room in self.rooms.itervalues():
+        for room in self.rooms.values():
             if room.id == roomId:
                 return room
         return None
@@ -249,7 +248,7 @@ class Room:
     def isAtPregameSettings(self, room):
         return RoomState.ROOM_IDLE < room.phase < RoomState.ROOM_MATCH_STARTED
     
-    def __str__(self):
+    def __repr__(self):
         return 'Room(id=%d, name="%s", players=%d)' % (
                 self.id, self.name, len(self.players))
 

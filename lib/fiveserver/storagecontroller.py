@@ -3,8 +3,7 @@ from twisted.enterprise import adbapi
 
 from time import time
 from random import uniform
-import _mysql_exceptions
-import log
+from fiveserver import log
 
 
 KEEPALIVE_QUERY = "SELECT (1)"
@@ -56,7 +55,7 @@ class WeightedPool:
 
     def weightedChoice(self, choices):
         sumWeight = 0
-        for choice, (cumulative, count) in choices.iteritems():
+        for choice, (cumulative, count) in choices.items():
             sumWeight+= cumulative/count
 
     def getPoolItem(self):

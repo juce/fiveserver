@@ -18,7 +18,7 @@ create table if not exists profiles (
     name varchar(32) not null unique,
     fav_player bigint unsigned default 0,
     fav_team bigint unsigned default 0,
-    rank int unsigned not null default 0,
+    `rank` int unsigned not null default 0,
     points int unsigned not null default 0,
     disconnects int unsigned not null default 0,
     updated_on timestamp not null default current_timestamp on update current_timestamp,
@@ -73,6 +73,17 @@ create table if not exists blocked (
     unique key(profile_id, blocked_profile_id),
     foreign key(profile_id) references profiles (id),
     foreign key(blocked_profile_id) references profiles (id)
+
+) Engine=InnoDB default charset=utf8;
+
+create table if not exists settings (
+    id bigint unsigned not null auto_increment,
+    profile_id int unsigned not null,
+    settings1 blob default null,
+    settings2 blob default null,
+    primary key(id),
+    unique key(profile_id),
+    foreign key(profile_id) references profiles (id)
 
 ) Engine=InnoDB default charset=utf8;
 

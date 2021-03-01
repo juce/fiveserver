@@ -1,8 +1,9 @@
 all:
-	@echo Assuming you already have python2.6 and virtualenv, to install
+	@echo Assuming you already have python3, to install
 	@echo all necessary dependencies do: make install
 
 FSENV=$(HOME)/fsenv
 install:
-	virtualenv --no-site-packages --unzip-setuptools $(FSENV)
+	python3 -m venv $(FSENV)
+	$(FSENV)/bin/pip install wheel
 	$(FSENV)/bin/pip install -r ./pip.requirements

@@ -41,7 +41,7 @@ profileLogic = logic.ProfileLogic(matchData, profileData)
 config = FiveServerConfig(
     scfg, dbConfig, userData, profileData, matchData, profileLogic)
 
-for gameName,port in scfg.GamePorts.iteritems():
+for gameName,port in scfg.GamePorts.items():
     factory = PacketServiceFactory(config)
     factory.protocol = pes5.NewsProtocol
     if hasattr(scfg, 'Greeting'):
@@ -83,31 +83,31 @@ adminConfig = YamlConfig(fsroot + '/etc/conf/admin.yaml')
 
 # server admin web-service (HTTPS, authentication)
 adminRoot = admin.AdminRootResource(adminConfig, config)
-adminRoot.putChild('', adminRoot)
-adminRoot.putChild('home', adminRoot)
-adminRoot.putChild('xsl', admin.XslResource(adminConfig))
-adminRoot.putChild('log', admin.LogResource(adminConfig, config))
-adminRoot.putChild('biglog', admin.LogResource(adminConfig, config))
+adminRoot.putChild(b'', adminRoot)
+adminRoot.putChild(b'home', adminRoot)
+adminRoot.putChild(b'xsl', admin.XslResource(adminConfig))
+adminRoot.putChild(b'log', admin.LogResource(adminConfig, config))
+adminRoot.putChild(b'biglog', admin.LogResource(adminConfig, config))
 usersResource = admin.UsersResource(adminConfig, config)
-adminRoot.putChild('users', usersResource)
+adminRoot.putChild(b'users', usersResource)
 usersResource.putChild(
-    'online', admin.UsersOnlineResource(adminConfig, config))
-adminRoot.putChild('stats', admin.StatsResource(adminConfig, config))
-adminRoot.putChild('profiles', admin.ProfilesResource(adminConfig, config))
+    b'online', admin.UsersOnlineResource(adminConfig, config))
+adminRoot.putChild(b'stats', admin.StatsResource(adminConfig, config))
+adminRoot.putChild(b'profiles', admin.ProfilesResource(adminConfig, config))
 adminRoot.putChild(
-    'userlock', admin.UserLockResource(adminConfig, config))
+    b'userlock', admin.UserLockResource(adminConfig, config))
 adminRoot.putChild(
-    'userkill', admin.UserKillResource(adminConfig, config))
-adminRoot.putChild('maxusers', admin.MaxUsersResource(adminConfig, config))
-adminRoot.putChild('debug', admin.DebugResource(adminConfig, config))
-adminRoot.putChild('settings', admin.StoreSettingsResource(adminConfig, config))
-adminRoot.putChild('roster', admin.RosterResource(adminConfig, config))
-adminRoot.putChild('banned', admin.BannedResource(adminConfig, config))
-adminRoot.putChild('ban-add', admin.BanAddResource(adminConfig, config))
+    b'userkill', admin.UserKillResource(adminConfig, config))
+adminRoot.putChild(b'maxusers', admin.MaxUsersResource(adminConfig, config))
+adminRoot.putChild(b'debug', admin.DebugResource(adminConfig, config))
+adminRoot.putChild(b'settings', admin.StoreSettingsResource(adminConfig, config))
+adminRoot.putChild(b'roster', admin.RosterResource(adminConfig, config))
+adminRoot.putChild(b'banned', admin.BannedResource(adminConfig, config))
+adminRoot.putChild(b'ban-add', admin.BanAddResource(adminConfig, config))
 adminRoot.putChild(
-    'ban-remove', admin.BanRemoveResource(adminConfig, config))
-adminRoot.putChild('server-ip', admin.ServerIpResource(adminConfig, config))
-adminRoot.putChild('ps', admin.ProcessInfoResource(adminConfig, config))
+    b'ban-remove', admin.BanRemoveResource(adminConfig, config))
+adminRoot.putChild(b'server-ip', admin.ServerIpResource(adminConfig, config))
+adminRoot.putChild(b'ps', admin.ProcessInfoResource(adminConfig, config))
 adminServer = Site(adminRoot)
 reactor.listenSSL(adminConfig.AdminPort, adminServer, ServerContextFactory(),
     interface=config.interface)
@@ -115,17 +115,17 @@ reactor.listenSSL(adminConfig.AdminPort, adminServer, ServerContextFactory(),
 # stats web-service (HTTP, no authentication)
 # Only available for requests from localhost
 statsRoot = admin.StatsRootResource(adminConfig, config, False)
-statsRoot.putChild('', statsRoot)
-statsRoot.putChild('home', statsRoot)
-statsRoot.putChild('xsl', admin.XslResource(adminConfig))
+statsRoot.putChild(b'', statsRoot)
+statsRoot.putChild(b'home', statsRoot)
+statsRoot.putChild(b'xsl', admin.XslResource(adminConfig))
 usersResource = admin.UsersResource(adminConfig, config, False)
-statsRoot.putChild('users', usersResource)
+statsRoot.putChild(b'users', usersResource)
 usersResource.putChild(
-    'online', admin.UsersOnlineResource(adminConfig, config, False))
-statsRoot.putChild('stats', admin.StatsResource(adminConfig, config, False))
+    b'online', admin.UsersOnlineResource(adminConfig, config, False))
+statsRoot.putChild(b'stats', admin.StatsResource(adminConfig, config, False))
 statsRoot.putChild(
-    'profiles', admin.ProfilesResource(adminConfig, config, False))
-statsRoot.putChild('ps', admin.ProcessInfoResource(adminConfig, config, False))
+    b'profiles', admin.ProfilesResource(adminConfig, config, False))
+statsRoot.putChild(b'ps', admin.ProcessInfoResource(adminConfig, config, False))
 statsServer = Site(statsRoot)
 statsService = TCPServer(adminConfig.AdminPort+1, statsServer, 
     interface='127.0.0.1') # restrict to localhost requests only

@@ -10,13 +10,13 @@ import binascii
 from fiveserver import errors
 
 
-def makePacketHeader(bytes):
+def makePacketHeader(bs):
     """
     Create a packet header from a string buffer
     """
-    id = struct.unpack('!H', bytes[0:2])[0]
-    length = struct.unpack('!H', bytes[2:4])[0]
-    packet_count = struct.unpack('!I',bytes[4:8])[0]
+    id = struct.unpack('!H', bs[0:2])[0]
+    length = struct.unpack('!H', bs[2:4])[0]
+    packet_count = struct.unpack('!I',bs[4:8])[0]
     return PacketHeader(id, length, packet_count)
      
 
@@ -27,13 +27,13 @@ def readPacketHeader(stream):
     return makePacketHeader(stream.read(8))
  
 
-def makePacket(bytes):
+def makePacket(bs):
     """
     Read bytes from the stream and create a packet
     """
-    header = makePacketHeader(bytes[0:8])
-    md5 = bytes[8:24]
-    data = bytes[24:24 + header.length]
+    header = makePacketHeader(bs[0:8])
+    md5 = bs[8:24]
+    data = bs[24:24 + header.length]
     p = Packet(header, data)
     if p.md5.digest() != md5:
         raise errors.NetworkError(
@@ -68,8 +68,8 @@ class PacketHeader:
         self.length = length
         self.packet_count = packet_count
 
-    def __str__(self):
-        return '%s%s%s' % (
+    def __bytes__(self):
+        return b'%s%s%s' % (
                 struct.pack('!H',self.id),
                 struct.pack('!H',self.length),
                 struct.pack('!I',self.packet_count))
@@ -89,10 +89,10 @@ class Packet:
     def __init__(self, header, data):
         self.header = header
         self.data = data
-        self.md5 = hashlib.md5('%s%s' % (header,data))
+        self.md5 = hashlib.md5(b'%s%s' % (header,data))
         
-    def __str__(self):
-        return '%s%s%s' % (
+    def __bytes__(self):
+        return b'%s%s%s' % (
                 self.header,
                 self.md5.digest(),
                 self.data)

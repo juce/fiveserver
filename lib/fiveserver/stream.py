@@ -3,18 +3,20 @@ Stream classes
 """
 
 import operator
+import struct
 
 
-XOR_KEY = '\xa6\x77\x95\x7c'
+XOR_KEY = b'\xa6\x77\x95\x7c'
 
 
 def xorData(data, start=0):
-    chars = []
+    bs = []
     key_size = len(XOR_KEY)
     for i,c in enumerate(data):
-        chars.append(chr(operator.xor(
-            ord(XOR_KEY[(start+i) % key_size]), ord(c))))
-    return ''.join(chars)
+        bs.append(struct.pack('!B', operator.xor(
+            XOR_KEY[(start+i) % key_size], c)
+        ))
+    return b''.join(bs)
  
 
 class XorStream:

@@ -5,7 +5,7 @@ User-related data
 from datetime import timedelta
 import struct
 from fiveserver import log
-import util
+from fiveserver.model import util
 
 
 class Profile:
@@ -80,12 +80,12 @@ class UserState:
     IP-addresses, ports, lobby Id, etc.
     """
 
-    def tostr(self, s):
-        return util.stripZeros(str(s))
+    #def tostr(self, v):
+    #    return util.stripZeros(str(v)).decode('utf-8')
 
-    def __str__(self):
-        return 'UserState: (%s)' % ','.join(["%s=%s" % (k,self.tostr(v)) 
-                for k,v in self.__dict__.iteritems()])
+    def __repr__(self):
+        return 'UserState(%s)' % ','.join(["%s=%s" % (k,v) 
+                for k,v in self.__dict__.items()])
 
 
 class Stats:

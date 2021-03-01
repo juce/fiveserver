@@ -1,6 +1,6 @@
 from twisted.internet import defer
-from model import user
-import errors
+from fiveserver.model import user
+from fiveserver import errors
 
 
 class ProfileLogic:
