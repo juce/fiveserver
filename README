@@ -1,11 +1,12 @@
-# Fiveserver 0.5.0
-
+Fiveserver
+==========
 Copyright (C) 2011-2021 juce and reddwarf
 License: BSD-style
 
 
 
-## ABOUT
+ABOUT
+=====
 
 
 Fiveserver is a pure-Python implementation of network server for the
@@ -27,7 +28,8 @@ Notable features:
 
 
 
-## INSTALL
+INSTALL
+=======
 
 
 The following two-step installation sequence should work as is on any Unix OS,
@@ -39,31 +41,29 @@ http://sites.google.com/site/fiveservercom/
 If you are on modern Debian or Ubuntu Linux then this should install everything
 you need:
 
-```
-sudo apt-get -y update
-sudo apt-get install libmysqlclient-dev python3 python3-venv python3-dev gcc make
-```
+    sudo apt-get -y update
+    sudo apt-get install libmysqlclient-dev python3 python3-venv python3-dev gcc make
 
-   Otherwise, you will need to use your OS tools to install:
-   * Python 3
-   * libmysqlclient.
-   * gcc or clang
-   * make
+Otherwise, you will need to use your OS tools to install:
+
+    * Python 3
+    * libmysqlclient.
+    * gcc or clang
+    * make
 
 
-2. Return to fiveserver source directory and install all the necessary dependencies
-by issuing this command (as yourself, not root):
+2. Return to fiveserver source directory and install Python environment and
+packages by issuing this command (as yourself, not root):
 
-```
-make install
-```
+    make install
 
 This will create an isolated Python environment and install all Python packages
 needed to run Fiveserver/Sixserver
 
 
 
-## CONFIGURE MYSQL DATABASES
+CONFIGURE MYSQL DATABASES
+=========================
 
 
 The following instructions assume that you can use a command-line mysql client 
@@ -73,54 +73,37 @@ For Fiveserver (PES5/WE9/WE9LE), you will need to create a database and grant
 appropriate permissions. If you use default database name and login/password 
 (you can change all of those in ./etc/conf/fiveserver.yaml), then it would be this:
 
-```
-create database sixserver;
-create user 'fiveserver'@'%' identified by 'we9le';
-grant select, insert, update on sixserver.* to 'fiveserver'@'%';
-```
 
-Create the tables:
-
-```
-use fiveserver;
-source ./sql/schema.sql
-```
+    create database fiveserver;
+    create user 'fiveserver'@'%' identified by 'we9le';
+    grant select, insert, update on sixserver.* to 'fiveserver'@'%';
+    use fiveserver;
+    source ./sql/schema.sql
 
 
 For Sixserver (PES6/WE2007), you will need to create a database and grant
 appropriate permissions. If you use default database name and login/password 
 (you can change all of those in ./etc/conf/sixserver.yaml), then it would be this:
 
-```
-create database sixserver;
-create user 'sixserver'@'%' identified by 'proevo';
-grant select, insert, update on sixserver.* to 'sixserver'@'%';
-```
-
-Create the tables:
-
-```
-use sixserver;
-source ./sql/schema6.sql
-```
+    create database sixserver;
+    create user 'sixserver'@'%' identified by 'proevo';
+    grant select, insert, update on sixserver.* to 'sixserver'@'%';
+    use sixserver;
+    source ./sql/schema6.sql
 
 
 
-## USAGE
+USAGE
+=====
 
 
 The service.sh script can be used to run both services (fiveserver and sixserver) or
 to launch them in the background. Just run the script without any arguments to see
 all available options:
 
-```
-$ ./service.sh 
-Usage ./service.sh {fiveserver|sixserver} {run|start|stop|status}
-```
+    ./service.sh 
+    Usage ./service.sh {fiveserver|sixserver} {run|start|stop|status}
 
 For example, to start fiveserver service, you would do:
 
-```
-$ ./service.sh fiveserver start
-```
-
+    ./service.sh fiveserver start
