@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 fsroot=${FSROOT:-.}
-export FSENV=${FSENV:-$HOME/fsenv}
+export FSENV=${FSENV:-.local}
 export PYTHONPATH=${fsroot}/lib:$PYTHONPATH
 
 RETVAL=0

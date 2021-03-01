@@ -2,7 +2,7 @@ all:
 	@echo Assuming you already have python3, to install
 	@echo all necessary dependencies do: make install
 
-FSENV=$(HOME)/fsenv
+FSENV=.local
 install:
 	python3 -m venv $(FSENV)
 	$(FSENV)/bin/pip install wheel
