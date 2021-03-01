@@ -263,7 +263,7 @@ class LoginService(PacketDispatcher):
                 'index':struct.pack('!B', i),
                 'id':struct.pack('!i', profile.id),
                 'name':util.padWithZeros(profile.name, 16),
-                'playTime':struct.pack('!i', profile.playTime.seconds),
+                'playTime':struct.pack('!i', profile.playTime.total_seconds),
                 'division':struct.pack('!B', 
                     self.factory.ratingMath.getDivision(profile.points)),
                 'points':struct.pack('!i', profile.points),
