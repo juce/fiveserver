@@ -1,11 +1,11 @@
-Fiveserver 0.4.12
+# Fiveserver 0.5.0
+
 Copyright (C) 2011-2021 juce and reddwarf
 License: BSD-style
 
 
 
-ABOUT
-=====
+## ABOUT
 
 
 Fiveserver is a pure-Python implementation of network server for the
@@ -27,39 +27,43 @@ Notable features:
 
 
 
-INSTALL
-=======
+## INSTALL
 
 
-The following three-step installation sequence should work as is on any Unix OS,
+The following two-step installation sequence should work as is on any Unix OS,
 such as Linux (any flavour), FreeBSD or Mac OSX. If you are using Windows, then
 it is recommended that you download a pre-built Windows-specific package from 
 http://sites.google.com/site/fiveservercom/
 
-1. Prerequisites
-   Make sure you have development packages installed for Python and libmysqlclient.
-   You will also need gcc and make. Depending on which Linux distribution you have,
-   the command is going to be different, but for example, on Ubuntu:
+1. Python 3 and dependencies
+If you are on modern Debian or Ubuntu Linux then this should install everything
+you need:
 
-   sudo apt-get -y update
-   sudo apt-get install libmysqlclient-dev python3 python3-venv python3-dev gcc make
+```
+sudo apt-get -y update
+sudo apt-get install libmysqlclient-dev python3 python3-venv python3-dev gcc make
+```
 
-2. Install Python 3, if your system doesn't have it.
-   Go to http://python.org/download/ and get the installer that is appropriate
-   for your operating system. (If you are on Linux, you can also use yum or apt-get)
-
-3. Return to fiveserver source directory and install all the necessary dependencies
-   by issuing this command (as yourself, not root):
-
-   make install
-
-   This will create an isolated Python environment and install all Python packages
-   needed to run Fiveserver/Sixserver
+   Otherwise, you will need to use your OS tools to install:
+   * Python 3
+   * libmysqlclient.
+   * gcc or clang
+   * make
 
 
+2. Return to fiveserver source directory and install all the necessary dependencies
+by issuing this command (as yourself, not root):
 
-CONFIGURE MYSQL DATABASES
-=========================
+```
+make install
+```
+
+This will create an isolated Python environment and install all Python packages
+needed to run Fiveserver/Sixserver
+
+
+
+## CONFIGURE MYSQL DATABASES
 
 
 The following instructions assume that you can use a command-line mysql client 
@@ -69,41 +73,54 @@ For Fiveserver (PES5/WE9/WE9LE), you will need to create a database and grant
 appropriate permissions. If you use default database name and login/password 
 (you can change all of those in ./etc/conf/fiveserver.yaml), then it would be this:
 
-mysql> create database fiveserver;
-mysql> grant select, insert, update on fiveserver.* to 'fiveserver'@'%' identified by 'we9le';
+```
+create database sixserver;
+create user 'fiveserver'@'%' identified by 'we9le';
+grant select, insert, update on sixserver.* to 'fiveserver'@'%';
+```
 
 Create the tables:
 
-mysql> use fiveserver;
-mysql> source ./sql/schema.sql
+```
+use fiveserver;
+source ./sql/schema.sql
+```
 
 
 For Sixserver (PES6/WE2007), you will need to create a database and grant
 appropriate permissions. If you use default database name and login/password 
 (you can change all of those in ./etc/conf/sixserver.yaml), then it would be this:
 
-mysql> create database sixserver;
-mysql> grant select, insert, update on sixserver.* to 'sixserver'@'%' identified by 'proevo';
+```
+create database sixserver;
+create user 'sixserver'@'%' identified by 'proevo';
+grant select, insert, update on sixserver.* to 'sixserver'@'%';
+```
 
 Create the tables:
 
-mysql> use sixserver;
-mysql> source ./sql/schema6.sql
+```
+use sixserver;
+source ./sql/schema6.sql
+```
 
 
 
-USAGE
-=====
+## USAGE
 
 
 The service.sh script can be used to run both services (fiveserver and sixserver) or
 to launch them in the background. Just run the script without any arguments to see
 all available options:
 
+```
 $ ./service.sh 
 Usage ./service.sh {fiveserver|sixserver} {run|start|stop|status}
+```
 
 For example, to start fiveserver service, you would do:
 
+```
 $ ./service.sh fiveserver start
+```
 
