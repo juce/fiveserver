@@ -144,7 +144,7 @@ class LoginService(RosterHandler, pes5.LoginService):
                 'name':util.padWithZeros(profile.name, 48),
                 'division':struct.pack('!B', 
                     self.factory.ratingMath.getDivision(profile.points)),
-                'playTime':struct.pack('!i', profile.playTime.total_seconds),
+                'playTime':struct.pack('!i', int(profile.playTime.total_seconds())),
                 'points':struct.pack('!i', profile.points),
                 'games':struct.pack('!H', games),
                 'rating':struct.pack('!H',profile.rating),
