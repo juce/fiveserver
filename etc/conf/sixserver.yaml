@@ -7,7 +7,7 @@ Comment: |
 
 ServerIP: auto
 ListenOn: ""
-IpDetectUri: "http://mapote.com/cgi-bin/ip.py"
+IpDetectUri: "http://api.ipify.org"
 
 Lobbies:
     - 'Russia'
