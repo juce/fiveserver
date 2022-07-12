@@ -595,11 +595,10 @@ class NetworkMenuService(LoginService):
                 b'%(fav-team)s%(fav-player)s%(rank)s' % {
                     b'id': struct.pack('!i',profile.id),
                     b'name': util.padWithZeros(profile.name, 16),
-                    b'division': struct.pack('!B', 
+                    b'division': struct.pack('!B',
                         self.factory.ratingMath.getDivision(profile.points)),
                     b'points': struct.pack('!i', profile.points),
-                    b'games': struct.pack('!H', 
-                        stats.wins+stats.losses+stats.draws),
+                    b'games': struct.pack('!H', stats.games),
                     b'wins': struct.pack('!H', stats.wins),
                     b'losses': struct.pack('!H', stats.losses),
                     b'draws': struct.pack('!H', stats.draws),

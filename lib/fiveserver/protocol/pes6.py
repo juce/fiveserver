@@ -142,13 +142,13 @@ class LoginService(RosterHandler, pes5.LoginService):
                 b'index':struct.pack('!B', i),
                 b'id':struct.pack('!i', profile.id),
                 b'name':util.padWithZeros(profile.name, 48),
-                b'division':struct.pack('!B', 
+                b'division':struct.pack('!B',
                     self.factory.ratingMath.getDivision(profile.points)),
                 b'playTime':struct.pack('!i', int(profile.playTime.total_seconds())),
                 b'points':struct.pack('!i', profile.points),
                 b'games':struct.pack('!H', games),
                 b'rating':struct.pack('!H',profile.rating),
-                } 
+                }
             for (_, games), (i, profile) in zip(
                 results, enumerate(profiles))])
         self.sendData(0x3012, data)
@@ -207,10 +207,10 @@ class MainService(RosterHandler, pes5.MainService):
                 yield self.exitingRoom(room, self._user)
                 # update participation of remaining players in room
                 data = self.formatRoomParticipationStatus(room)
-                for player in room.players:                
+                for player in room.players:
                     player.sendData(0x4365, data)
             self.exitingLobby(self._user)
-    
+
     def formatPlayerInfo(self, usr, roomId, stats=None):
         if stats is None:
             stats = user.Stats(usr.profile.id, 0,0,0,0,0,0,0)
@@ -223,13 +223,12 @@ class MainService(RosterHandler, pes5.MainService):
             b'groupid': struct.pack('!i',0),
             b'groupname': b'\0'*48,
             b'groupmemberstatus': struct.pack('!B',0),
-            b'division': struct.pack('!B', 
+            b'division': struct.pack('!B',
                 self.factory.ratingMath.getDivision(usr.profile.points)),
             b'roomid': struct.pack('!i',roomId),
             b'points': struct.pack('!i',usr.profile.points),
-            b'rating': struct.pack('!H',0),
-            b'matches': struct.pack('!H',
-                stats.wins + stats.losses + stats.draws),
+            b'rating': struct.pack('!H',usr.profile.rating),
+            b'matches': struct.pack('!H', stats.games),
             b'wins': struct.pack('!H',stats.wins),
             b'losses': struct.pack('!H',stats.losses),
             b'draws': struct.pack('!H',stats.draws),
@@ -256,12 +255,11 @@ class MainService(RosterHandler, pes5.MainService):
                 b'groupid': struct.pack('!i',0),
                 b'groupname': util.padWithZeros('Playmakers',48),
                 b'groupmemberstatus': struct.pack('!B',1),
-                b'division': struct.pack('!B', 
+                b'division': struct.pack('!B',
                     self.factory.ratingMath.getDivision(profile.points)),
                 b'points': struct.pack('!i',profile.points),
                 b'rating': struct.pack('!H',profile.rating),
-                b'matches': struct.pack('!H',
-                    stats.wins + stats.losses + stats.draws),
+                b'matches': struct.pack('!H', stats.games),
                 b'wins': struct.pack('!H',stats.wins),
                 b'losses': struct.pack('!H',stats.losses),
                 b'draws': struct.pack('!H',stats.draws),
@@ -981,6 +979,7 @@ class MainService(RosterHandler, pes5.MainService):
                 stats = yield self.getStats(profile.id)
                 rm = self.factory.ratingMath
                 profile.points = rm.getPoints(stats)
+                profile.rating = rm.getRating(stats)
                 # store updated profile
                 yield self.factory.storeProfile(profile)
         else:

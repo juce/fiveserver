@@ -67,7 +67,7 @@ class User:
             if profile.id == profileId:
                 return i, profile
         return -1, None
-            
+
     def getRoomId(self):
         try: return self.state.room.id
         except AttributeError:
@@ -110,3 +110,6 @@ class Stats:
         else:
             self.teams = teams
 
+    @property
+    def games(self):
+        return self.wins + self.losses + self.draws

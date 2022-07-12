@@ -275,8 +275,7 @@ class ProfilesResource(BaseXmlResource):
                 root.addElement('disconnects').addContent(
                     str(profile.disconnects))
                 root.addElement('playTime').addContent(str(profile.playTime))
-                games = stats.wins + stats.draws + stats.losses
-                root.addElement('games').addContent(str(games))
+                root.addElement('games').addContent(str(stats.games))
                 root.addElement('wins').addContent(str(stats.wins))
                 root.addElement('draws').addContent(str(stats.draws))
                 root.addElement('losses').addContent(str(stats.losses))
@@ -288,10 +287,10 @@ class ProfilesResource(BaseXmlResource):
                     str(stats.streak_current))
                 root.addElement('winningStreakBest').addContent(
                     str(stats.streak_best))
-                if games>0: 
-                    winPct = stats.wins/float(games)
-                    avglscr = stats.goals_scored/float(games)
-                    avglcon = stats.goals_allowed/float(games)
+                if stats.games>0:
+                    winPct = stats.wins/float(stats.games)
+                    avglscr = stats.goals_scored/float(stats.games)
+                    avglcon = stats.goals_allowed/float(stats.games)
                 else:
                     winPct = 0.0
                     avglscr = 0.0

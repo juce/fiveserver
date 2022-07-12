@@ -36,16 +36,24 @@ class RatingMath:
         self.w1 = w1
         self.w2 = w2
 
+    def getPerformance(self, wins, draws, games):
+        return (wins + 0.333 * draws)/games
+
+    def getRating(self, stats):
+        if stats.games < 10:
+            return 0.0
+        perf = getPerformance(stats.wins, stats.draws, stats.games)
+        return round(perf * 10, 1)
+
     def getScore(self, perf, num_games):
         return self.w2 + self.w1*perf*perf + self.w2*(
             -math.exp(-num_games*0.05))
 
     def getPoints(self, stats):
-        num_games = stats.wins + stats.draws + stats.losses
-        if num_games == 0:
+        if stats.games == 0:
             perf = 0.0
         else:
-            perf = (stats.wins + 0.333*stats.draws)/num_games
+            perf = getPerformance(stats.wins, stats.draws, stats.games)
         return int(1000*self.getScore(perf, num_games))
 
     def getDivision(self, points):
