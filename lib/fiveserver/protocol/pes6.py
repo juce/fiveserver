@@ -451,6 +451,9 @@ class MainService(RosterHandler, pes5.MainService):
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
         chatType = pkt.data[0:2]
         message = util.stripZeros(pkt.data[10:])
+        if any(word in message.decode('utf-8')
+               for word in self.factory.serverConfig.Chat['bannedWords']):
+            message = b'[%s]' % self.factory.serverConfig.Chat['warningMessage'].encode('utf-8')
         data = b'%s%s%s%s%s' % (
                 chatType,
                 pkt.data[2:6],

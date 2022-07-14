@@ -54,6 +54,10 @@ DB:
 
 BannedList: ./etc/data/banned6.yaml
 
+Chat:
+    bannedWords: []
+    warningMessage: "message was removed because it contains banned words"
+
 Roster:
     enforceHash: false
     compareHash: true
