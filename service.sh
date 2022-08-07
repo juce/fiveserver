@@ -3,6 +3,9 @@ fsroot=${FSROOT:-.}
 export FSENV=${FSENV:-.local}
 export PYTHONPATH=${fsroot}/lib:$PYTHONPATH
 
+# this is needed on MacOS
+export LD_LIBRARY_PATH=/usr/local/mysql/lib
+
 RETVAL=0
 
 case "$1" in
