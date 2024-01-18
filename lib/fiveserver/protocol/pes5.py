@@ -6,7 +6,6 @@ from twisted.internet import reactor, defer
 from twisted.application import service
 from twisted.web import client
 
-from Crypto.Cipher import AES
 from datetime import datetime, timedelta
 from hashlib import md5
 import binascii
@@ -198,9 +197,7 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-        cipher = AES.new((self.factory.cipherKey).encode("utf8"), AES.MODE_CBC)
-        log.msg('[AES]: %s' % PacketFormatter.format(pkt, cipher))
-        clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
+        clientRosterHash = self.getRosterHash(pkt.data)
         userHash =  binascii.b2a_hex(pkt.data[32:48])
         
         try:
