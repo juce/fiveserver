@@ -199,11 +199,11 @@ class LoginService(PacketDispatcher):
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
         cipher = AES.new((self.factory.cipherKey).encode("utf8"), AES.MODE_CBC)
-        log.debug('[AES]: %s' % PacketFormatter.format(pkt, cipher))
+        log.msg('[AES]: %s' % PacketFormatter.format(pkt, cipher))
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
         userHash =  binascii.b2a_hex(pkt.data[32:48])
 
-        hash5 = binascii.b2a_hex(cipher.decrypt(pkt.data)[32:48])
+        hash5 = binascii.a2b_hex(cipher.decrypt(pkt.data)[32:48])
         log.msg('x5 {%s}' % hash5)
         
         try:
