@@ -31,6 +31,7 @@ def getResultContent(webDir):
 class RegistrationResource(resource.Resource):
     isLeaf = True
     def __init__(self, config, webDir):
+        nonce, tag, ciphertext = [ self.config.cipherKey.read(x) for x in (16, 16, -1) ]
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
