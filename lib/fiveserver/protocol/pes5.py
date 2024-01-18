@@ -194,7 +194,7 @@ class LoginService(PacketDispatcher):
         return True
 
     def getRosterHash(self, pkt_data):
-        return pkt_data[48:64]
+        return binascii.b2a_hex(pkt_data[48:64])
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
@@ -209,8 +209,6 @@ class LoginService(PacketDispatcher):
 
         hash5 = binascii.b2a_hex(cipher.decrypt(pkt.data[32:48]))
         log.msg('x5 {%s}' % hash5)
-        hash6 = binascii.a2b_hex(cipher.decrypt(pkt.data[32:48]))
-        log.msg('x6 {%s}' % hash6)
         
         try:
             self._user = yield self.factory.getUser(userHash)
