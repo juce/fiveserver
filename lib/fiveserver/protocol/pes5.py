@@ -208,9 +208,9 @@ class LoginService(PacketDispatcher):
         userHash =  binascii.b2a_hex(pkt.data[32:48])
 
         hash5 = binascii.b2a_hex(cipher.decrypt(pkt.data[32:48]))
-        log.msg('x {%s}' % hash5)
+        log.msg('x5 {%s}' % hash5)
         hash6 = binascii.a2b_hex(cipher.decrypt(pkt.data[32:48]))
-        log.msg('x {%s}' % hash6)
+        log.msg('x6 {%s}' % hash6)
         
         try:
             self._user = yield self.factory.getUser(userHash)
