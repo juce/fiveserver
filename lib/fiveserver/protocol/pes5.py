@@ -192,12 +192,9 @@ class LoginService(PacketDispatcher):
                 return False
         return True
 
-    def getRosterHash(self, pkt_data):
-        return binascii.b2a_hex(pkt_data[48:64])
-
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-        clientRosterHash = self.getRosterHash(pkt.data)
+        clientRosterHash = binascii.b2a_hex(pkt.data[48:64])
         userHash =  binascii.b2a_hex(pkt.data[32:48])
         log.msg('userHash: %s' % userHash)
         log.msg('clientRosterHash: %s' % clientRosterHash)
