@@ -198,10 +198,9 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-        clientRosterHash = pkt.data[32:48]
-        log.msg('pre: {%s}' % pkt.data[32:48])
-        log.msg('hash: {%s}' % pkt.data[32:48])
-        userHash = pkt.data[32:48]
+
+        clientRosterHash = binascii.b2a_hex(pkt.data[32:48])
+        userHash = clientRosterHash
 
         try:
             self._user = yield self.factory.getUser(userHash)
