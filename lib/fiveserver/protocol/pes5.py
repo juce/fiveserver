@@ -195,7 +195,7 @@ class LoginService(PacketDispatcher):
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
         clientRosterHash = binascii.b2a_hex(pkt.data[48:64])
-        userHash =  binascii.b2a_hex(pkt.data[32:48])
+        userHash =  binascii.a2b_hex(binascii.b2a_hex(pkt.data[32:48]))
         log.msg('userHash: %s' % userHash)
         log.msg('clientRosterHash: %s' % clientRosterHash)
         
