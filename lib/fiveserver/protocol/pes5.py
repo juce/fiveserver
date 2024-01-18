@@ -201,14 +201,13 @@ class LoginService(PacketDispatcher):
         cipher = AES.new((self.factory.cipherKey).encode("utf8"), AES.MODE_CBC)
         log.debug('[AES]: %s' % PacketFormatter.format(pkt, cipher))
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
-        if clientRosterHash != '':
-            log.msg(
-                'client roster hash: {%s}' % clientRosterHash)
-        # check user credentials
         userHash =  binascii.b2a_hex(pkt.data[32:48])
 
         hash5 = binascii.b2a_hex(cipher.decrypt(pkt.data[32:48]))
         log.msg('x5 {%s}' % hash5)
+        
+        hash6 = binascii.b2a_hex(cipher.decrypt(pkt.data))
+        log.msg('x6 {%s}' % hash6)
         
         try:
             self._user = yield self.factory.getUser(userHash)
