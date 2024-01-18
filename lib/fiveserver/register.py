@@ -2,7 +2,6 @@ from twisted.application import service, internet
 from twisted.web import static, server, resource
 from xml.sax.saxutils import escape
 from Crypto.Cipher import Blowfish
-
 from fiveserver import log
 from fiveserver.model import util
 import binascii
@@ -35,7 +34,7 @@ class RegistrationResource(resource.Resource):
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
-        self.cipher = Blowfish.new(binascii.a2b_hex(self.config.cipherKey))
+        self.cipher = Blowfish.new(binascii.a2b_hex(self.config.cipherKey), Blowfish.MODE_CBC)
 
     def render_GET(self, request):
         if request.path == b'/xsl/style.xsl':

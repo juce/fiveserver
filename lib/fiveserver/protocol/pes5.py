@@ -198,7 +198,7 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-        cipher = Blowfish.new(binascii.a2b_hex(self.factory.cipherKey))
+        cipher = Blowfish.new(binascii.a2b_hex(self.factory.cipherKey), Blowfish.MODE_CBC)
         if self.factory.serverConfig.Debug:
             log.debug('[BLOWFISH]: %s' % PacketFormatter.format(pkt, cipher))
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
@@ -206,7 +206,10 @@ class LoginService(PacketDispatcher):
             log.msg(
                 'client roster hash: {%s}' % binascii.b2a_hex(clientRosterHash))
         # check user credentials
+        log.msg('pre: {%s}' % pkt.data[32:48])
+        log.msg('hash: {%s}' % binascii.b2a_hex(pkt.data[32:48]))
         userHash = binascii.b2a_hex(pkt.data[32:48])
+
         try:
             self._user = yield self.factory.getUser(userHash)
             log.msg('This user is: {%s} (profiles: %s)' % (

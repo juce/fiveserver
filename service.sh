@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 fsroot=${FSROOT:-.}
 export FSENV=${FSENV:-.local}
-export PYTHONPATH=${fsroot}/lib:$PYTHONPATH
+export PYTHONPATH=${fsroot}/lib/${PYTHON}
 
 # this is needed on MacOS
 export LD_LIBRARY_PATH=/usr/local/mysql/lib

@@ -43,7 +43,7 @@ Debug:
 DB:
     name: sixserver
     user: sixserver
-    password: proevo
+    password: NismanestamuertO_88
     readServers: [127.0.0.1]
     writeServers: [127.0.0.1]
     sharePool: True
