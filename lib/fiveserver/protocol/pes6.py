@@ -6,7 +6,6 @@ from twisted.internet import reactor, defer
 from twisted.application import service
 from twisted.web import client
 
-from Crypto.Cipher import Blowfish
 from datetime import datetime, timedelta
 from hashlib import md5
 import binascii
