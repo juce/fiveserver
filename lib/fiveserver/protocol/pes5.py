@@ -205,9 +205,9 @@ class LoginService(PacketDispatcher):
             log.msg(
                 'client roster hash: {%s}' % clientRosterHash)
         # check user credentials
-        log.msg('whats1: {%s}' % pkt.data[48:64])
-        log.msg('whats2: {%s}' % pkt.data[32:48])
-        userHash = pkt.data[32:48]
+        log.msg('whats1: {%s}' % binascii.a2b_hex(pkt.data[48:64]))
+        log.msg('whats2: {%s}' % binascii.a2b_hex(pkt.data[32:48]))
+        userHash =  binascii.a2b_hex(pkt.data[32:48])
 
         try:
             self._user = yield self.factory.getUser(userHash)
