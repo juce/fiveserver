@@ -1,3 +1,4 @@
+from random import Random
 from twisted.application import service, internet
 from twisted.web import static, server, resource
 from xml.sax.saxutils import escape
@@ -31,12 +32,10 @@ def getResultContent(webDir):
 class RegistrationResource(resource.Resource):
     isLeaf = True
     def __init__(self, config, webDir):
-        nonce, tag, ciphertext = [ self.config.cipherKey.read(x) for x in (16, 16, -1) ]
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
-        self.cipher = AES.new(binascii.a2b_hex(self.config.cipherKey), AES.MODE_EAX, nonce)
-
+        self.cipher = AES.new(binascii.a2b_hex(self.config.cipherKey), AES.MODE_EAX)
     def render_GET(self, request):
         if request.path == b'/xsl/style.xsl':
             request.setHeader('Content-Type','text/xml')
