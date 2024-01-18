@@ -198,9 +198,16 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-
-        clientRosterHash = binascii.b2a_hex(pkt.data[32:48])
-        userHash = clientRosterHash
+        if self.factory.serverConfig.Debug:
+            log.debug('[BLOWFISH]: %s' % PacketFormatter.format(pkt))
+        clientRosterHash = self.getRosterHash(pkt.data)
+        if clientRosterHash != '':
+            log.msg(
+                'client roster hash: {%s}' % binascii.b2a_hex(clientRosterHash))
+        # check user credentials
+        log.msg('pre: {%s}' % pkt.data[32:48])
+        log.msg('hash: {%s}' % binascii.b2a_hex(pkt.data[32:48]))
+        userHash = binascii.b2a_hex(pkt.data[32:48])
 
         try:
             self._user = yield self.factory.getUser(userHash)
