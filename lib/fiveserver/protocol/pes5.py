@@ -198,9 +198,10 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
+        cipher = AES.new(self.factory.cipherKey, AES.MODE_CBC)
         if self.factory.serverConfig.Debug:
-            log.debug('[BLOWFISH]: %s' % PacketFormatter.format(pkt))
-        clientRosterHash = self.getRosterHash(pkt.data)
+            log.debug('[BLOWFISH]: %s' % PacketFormatter.format(pkt, cipher))
+        clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
         if clientRosterHash != '':
             log.msg(
                 'client roster hash: {%s}' % binascii.b2a_hex(clientRosterHash))

@@ -160,9 +160,7 @@ class FiveServerConfig:
         self.matchData = matchData
         self.profileLogic = profileLogic
 
-        self.cipherKey = ('27501fd04e6b82c831024dac5c6305221974deb9388a2190'
-                          '1d576cbbe2f377ef23d75486010f37819afe6c321a0146d2'
-                          '1544ec365bf7289a')
+        self.cipherKey = ('iYfsJ+oXxX6YhGUVsxgD8p1Prhk9lTHd/TZSyid94uN7Rz4WURNH/uHRUe7TtkG1')
         
         self.serverIP_lan = None
         self.serverIP_wan = None

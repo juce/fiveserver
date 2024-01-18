@@ -1,6 +1,7 @@
 from twisted.application import service, internet
 from twisted.web import static, server, resource
 from xml.sax.saxutils import escape
+from Crypto.Cipher import AES
 from fiveserver import log
 from fiveserver.model import util
 import binascii
@@ -33,6 +34,8 @@ class RegistrationResource(resource.Resource):
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
+        self.cipher = AES.new(self.config.cipherKey, AES.MODE_CBC)
+
     def render_GET(self, request):
         if request.path == b'/xsl/style.xsl':
             request.setHeader('Content-Type','text/xml')
@@ -130,6 +133,7 @@ class RegistrationResource(resource.Resource):
         #        binascii.b2a_hex(
         #            self.cipher.encrypt(binascii.a2b_hex(hash))))
         #print 'userKey: {%s}' % userKey
+        hash = binascii.b2a_hex(self.cipher.encrypt(binascii.a2b_hex(hash)))
         log.msg('userHash: {%s}' % hash)
         request.setHeader('Content-Type','text/xml')
         if self.config.isBanned(request.getClientIP()):
