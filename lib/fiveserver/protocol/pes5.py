@@ -199,6 +199,8 @@ class LoginService(PacketDispatcher):
     def authenticate_3003(self, pkt):
         clientRosterHash = self.getRosterHash(pkt.data)
         userHash =  binascii.b2a_hex(pkt.data[32:48])
+        log.msg('userHash: %s' % userHash)
+        log.msg('clientRosterHash: %s' % clientRosterHash)
         
         try:
             self._user = yield self.factory.getUser(userHash)
