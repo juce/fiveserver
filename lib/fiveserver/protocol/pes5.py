@@ -199,9 +199,9 @@ class LoginService(PacketDispatcher):
         log.msg('userHash: %s' % userHash)
         log.msg('clientRosterHash: %s' % clientRosterHash)
 
-        log.msg('test1 %s' % binascii.b2a_hex(pkt.data[0:16]))
-        log.msg('test2 %s' % binascii.b2a_hex(pkt.data[64:80]))
-        log.msg('test3 %s' % binascii.b2a_hex(pkt.data[80:96]))
+        log.msg('test1 %s' % pkt)
+        log.msg('test1 %s' % pkt.data)
+        log.msg('test1 %s' % pkt.data[32:48])
         
         try:
             self._user = yield self.factory.getUser(userHash)
