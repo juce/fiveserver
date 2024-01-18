@@ -35,7 +35,7 @@ class RegistrationResource(resource.Resource):
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
-        self.cipher = AES.new(binascii.crc_hqx(self.config.cipherKey), AES.MODE_EAX)
+        self.cipher = AES.new(binascii.crc32(self.config.cipherKey), AES.MODE_EAX)
     def render_GET(self, request):
         if request.path == b'/xsl/style.xsl':
             request.setHeader('Content-Type','text/xml')
