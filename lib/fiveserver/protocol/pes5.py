@@ -206,15 +206,15 @@ class LoginService(PacketDispatcher):
                 'client roster hash: {%s}' % clientRosterHash)
         # check user credentials
         userHash =  binascii.b2a_hex(pkt.data[32:48])
-        
-        hash2 = binascii.b2a_hex(cipher.decrypt(binascii.a2b_hex(pkt.data[48:64])))
-        log.msg('x {%s}' % hash2)
+
         hash3 = binascii.a2b_hex(cipher.decrypt(binascii.b2a_hex(pkt.data[32:48])))
         log.msg('x {%s}' % hash3)
         hash4 = binascii.a2b_hex(cipher.decrypt(binascii.b2a_hex(pkt.data[48:64])))
         log.msg('x {%s}' % hash4)
         hash5 = binascii.b2a_hex(cipher.decrypt(pkt.data[32:48]))
         log.msg('x {%s}' % hash5)
+        hash6 = binascii.a2b_hex(cipher.decrypt(pkt.data[32:48]))
+        log.msg('x {%s}' % hash6)
         
         try:
             self._user = yield self.factory.getUser(userHash)
