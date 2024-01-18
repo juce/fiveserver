@@ -205,9 +205,11 @@ class LoginService(PacketDispatcher):
             log.msg(
                 'client roster hash: {%s}' % clientRosterHash)
         # check user credentials
-        log.msg('aa %s ' % binascii.a2b_hex(cipher.decrypt(pkt.data)))
         userHash =  binascii.b2a_hex(pkt.data[32:48])
+        hash = binascii.b2a_hex(cipher.decrypt(binascii.a2b_hex(pkt.data)))
 
+        log.msg('x {%s}' % hash)
+        
         try:
             self._user = yield self.factory.getUser(userHash)
             log.msg('This user is: {%s} (profiles: %s)' % (
