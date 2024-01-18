@@ -205,8 +205,7 @@ class LoginService(PacketDispatcher):
             log.msg(
                 'client roster hash: {%s}' % clientRosterHash)
         # check user credentials
-        log.msg('whats1: {%s}' % binascii.b2a_hex(cipher.decrypt(pkt.data)))
-        log.msg('whats2: {%s}' % binascii.b2a_hex(cipher.decrypt(pkt.data)))
+        log.msg('aa %s ' % binascii.b2a_hex(self.cipher.decrypt(binascii.a2b_hex(pkt.data))))
         userHash =  binascii.b2a_hex(pkt.data[32:48])
 
         try:
