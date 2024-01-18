@@ -202,9 +202,6 @@ class LoginService(PacketDispatcher):
         log.msg('[AES]: %s' % PacketFormatter.format(pkt, cipher))
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
         userHash =  binascii.b2a_hex(pkt.data[32:48])
-
-        hash5 = binascii.a2b_hex(cipher.decrypt(pkt.data)[32:48])
-        log.msg('x5 {%s}' % hash5)
         
         try:
             self._user = yield self.factory.getUser(userHash)
