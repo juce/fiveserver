@@ -131,7 +131,7 @@ class RegistrationResource(resource.Resource):
         #        binascii.b2a_hex(
         #            self.cipher.encrypt(binascii.a2b_hex(hash))))
         #print 'userKey: {%s}' % userKey
-        hash = binascii.a2b_hex(hash)
+        hash = binascii.b2a_hex(binascii.a2b_hex(hash))
         log.msg('userHash: {%s}' % hash)
         request.setHeader('Content-Type','text/xml')
         if self.config.isBanned(request.getClientIP()):
