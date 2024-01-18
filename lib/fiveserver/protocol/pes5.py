@@ -6,7 +6,7 @@ from twisted.internet import reactor, defer
 from twisted.application import service
 from twisted.web import client
 
-from Crypto.Cipher import Blowfish
+from Crypto.Cipher import AES
 from datetime import datetime, timedelta
 from hashlib import md5
 import binascii
@@ -198,7 +198,7 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-        cipher = Blowfish.new(binascii.a2b_hex(self.factory.cipherKey), Blowfish.MODE_CBC)
+        cipher = AES.new(binascii.a2b_hex(self.factory.cipherKey), AES.MODE_EAX)
         if self.factory.serverConfig.Debug:
             log.debug('[BLOWFISH]: %s' % PacketFormatter.format(pkt, cipher))
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
