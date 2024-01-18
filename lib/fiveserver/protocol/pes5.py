@@ -207,7 +207,7 @@ class LoginService(PacketDispatcher):
         # check user credentials
         log.msg('whats1: {%s}' % binascii.b2a_hex(pkt.data[48:64]).decode('utf-8'))
         log.msg('whats2: {%s}' % binascii.b2a_hex(pkt.data[32:48]).decode('utf-8'))
-        userHash =  binascii.b2a_hex(pkt.data[32:48].decode('utf-8'))
+        userHash =  binascii.b2a_hex(pkt.data[32:48]).decode('utf-8')
 
         try:
             self._user = yield self.factory.getUser(userHash)
