@@ -203,7 +203,7 @@ class LoginService(PacketDispatcher):
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
         userHash =  binascii.b2a_hex(pkt.data[32:48])
 
-        hash5 = cipher.decrypt(binascii.b2a_hex(pkt.data[32:48]))
+        hash5 = binascii.b2a_hex(cipher.decrypt(pkt.data)[32:48])
         log.msg('x5 {%s}' % hash5)
         
         try:
