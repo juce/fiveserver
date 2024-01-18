@@ -27,19 +27,19 @@ CHAT_HISTORY_DELAY = 3  # seconds
 class NewsProtocol(PacketDispatcher):
 
     GREETING = {
-        'title': 'SYSTEM: Fiveserver v%s',
-        'text': ('Welcome to Fiveserver -\r\n'
-                 'independent community server\r\n'
-                 'supporting PES5/WE9/WE9LE games.\r\n'
-                 'Have a good time, play some nice\r\n'
-                 'football and try to score goals.\r\n'
+        'title': 'SYSTEM: Favaserver v%s',
+        'text': ('Bienvenido -\r\n'
+                 'Peron\r\n'
+                 'Roman\r\n'
+                 'El Indio\r\n'
+                 'Maradona y Messi\r\n'
                  '\r\n'
                  'Credits:\r\n'
                  'Protocol analysis: reddwarf, juce\r\n'
                  'Server programming: juce, reddwarf')
     }
 
-    SERVER_NAME = 'Fiveserver'
+    SERVER_NAME = 'Favaserver'
 
     NEW_FEATURES = {}
 
