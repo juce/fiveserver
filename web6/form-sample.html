@@ -1,5 +1,5 @@
 <html>
-<head><title>Sixserver Registration Form</title></head>
+<head><title>Favaserver</title></head>
 <script src="/md5.js" type="text/javascript"></script>
 <script>
 function makeHash() {
@@ -26,7 +26,7 @@ function makeHash() {
     return true;
 } 
 </script>
-<h3>Sixserver Registration Form</h3>
+<h3>Registro</h3>
 <div class="FormBody">
 <form name="registration" action="/register" method="POST">
 <input type="hidden" name="nonce" id="nonce" value="%(nonce)s"/>
@@ -34,10 +34,10 @@ function makeHash() {
 <strong>Serial:</strong><br />
 <input type="text" name="serial" id="serial" size="40" value="%(serial)s" onkeydown="if (event.keyCode == 13) {document.getElementById('btnGen').click(); return false;}" /><br />
 <br />
-<strong>Username:</strong><br />
+<strong>Nombre de usuario(corto, despues lo tenes que escribir con el joystick):</strong><br />
 <input type="text" name="user" id="username" size="40" value="%(username)s" onkeydown="if (event.keyCode == 13) {document.getElementById('btnGen').click(); return false;}" /><br />
 </form>
-<strong>Password:</strong><br />
+<strong>Password(lo mismo que arriba):</strong><br />
 <input type="password" id="password" size="40" value="" onkeydown="if (event.keyCode == 13) {document.getElementById('btnGen').click(); return false;}" /><br />
 <p>
 <input class="button" type="button" id="btnGen" value="Register" onclick="if (makeHash()) {document.forms['registration'].submit();}" />

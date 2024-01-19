@@ -1,9 +1,9 @@
-Name: Fiveserver Admin Service Configuration
+Name: Favaserver Admin Service Configuration
 Version: 1.0
 
 AdminPort: 8181
-AdminUser: fives
-AdminPassword: fives
+AdminUser: favas
+AdminPassword: favas
 KeysDirectory: ./etc/keys
 
 XslFile: ./web/style.xsl

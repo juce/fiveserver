@@ -10,18 +10,18 @@ ListenOn: ""
 IpDetectUri: "http://mapote.com/cgi-bin/ip.py"
 
 Lobbies:
-    - 'Russia'
-    - 'England'
-    - 'Italy'
-    - 'Spain'
-    - 'Germany'
-    - 'EuroLeague'
-    - name: 'Playground'
+    - 'Liga'
+    - 'Copa'
+    - 'Mundial'
+    - name: 'Test1'
       type: ['A']
-    - name: 'Training'
+    - name: 'Test2'
+      type: ['B']
+    - name: 'Test3'
+      type: ['C']
+    - name: 'Entrenamiento'
       type: noStats
       showMatches: False
-    - 'Guest Lobby'
 
 GamePorts:
     pes6: 10881
@@ -56,7 +56,7 @@ BannedList: ./etc/data/banned6.yaml
 
 Chat:
     bannedWords: []
-    warningMessage: "message was removed because it contains banned words"
+    warningMessage: "no podes decir eso, amigo"
 
 Roster:
     enforceHash: false
@@ -77,17 +77,17 @@ ShowStats: true
 #            player: 0
 #            opponent: 3
 
-ServerName: "Fiveserver"
+ServerName: "Favaserver"
 
 Greeting:
     "text": "\
-Welcome to Fiveserver -\n\
-independent community server\n\
-supporting PES6/WE2007 games.\n\
-Have a good time, play some nice\n\
-football and try to score goals.\n\
+Bienvenido -\n\
+El Diego\n\
+Messi\n\
+Román, el Indio y Perón\n\
 \n\
-Credits:\r\n\
+Creditos:\r\n\
+Fix Blowfish: pinfake, favascript\n\
 Protocol analysis: reddwarf, juce\n\
 Server programming: juce, reddwarf"
 
