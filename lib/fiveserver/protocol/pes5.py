@@ -198,7 +198,7 @@ class LoginService(PacketDispatcher):
 
     @defer.inlineCallbacks
     def authenticate_3003(self, pkt):
-        cipher = Blowfish.new(binascii.a2b_hex(self.factory.cipherKey))
+        cipher = Blowfish.new(binascii.a2b_hex(self.factory.cipherKey), Blowfish.MODE_ECB)
         if self.factory.serverConfig.Debug:
             log.debug('[BLOWFISH]: %s' % PacketFormatter.format(pkt, cipher))
         clientRosterHash = self.getRosterHash(cipher.decrypt(pkt.data))
