@@ -10,18 +10,20 @@ ListenOn: ""
 IpDetectUri: "http://mapote.com/cgi-bin/ip.py"
 
 Lobbies:
-    - 'Russia'
-    - 'England'
-    - 'Italy'
-    - 'Spain'
-    - 'Germany'
-    - 'EuroLeague'
-    - name: 'Playground'
+    - 'Basico'
+    - name: 'A'
       type: ['A']
-    - name: 'Training'
+    - name: '3B'
+      type: ['3B']
+    - name: '3A'
+      type: ['3A']
+    - name: '2'
+      type: ['2']
+    - name: '1'
+      type: ['1']
+    - name: 'Entrenamiento'
       type: noStats
       showMatches: False
-    - 'Guest Lobby'
 
 GamePorts:
     pes6: 10881
@@ -43,7 +45,7 @@ Debug:
 DB:
     name: sixserver
     user: sixserver
-    password: proevo
+    password: NismanestamuertO_88
     readServers: [127.0.0.1]
     writeServers: [127.0.0.1]
     sharePool: True
@@ -77,17 +79,16 @@ ShowStats: true
 #            player: 0
 #            opponent: 3
 
-ServerName: "Fiveserver"
+ServerName: "Favaserver"
 
 Greeting:
     "text": "\
-Welcome to Fiveserver -\n\
-independent community server\n\
-supporting PES6/WE2007 games.\n\
-Have a good time, play some nice\n\
-football and try to score goals.\n\
+Bienvenido -\n\
+Peron\n\
+El Diego, Roman, Messi\n\
+y el Indio Solari\n\
+\n\
 \n\
 Credits:\r\n\
-Protocol analysis: reddwarf, juce\n\
-Server programming: juce, reddwarf"
-
+Fix Blowfish: favascript, pinfake\n\
+Codigo Original: reddwarf, juce"
