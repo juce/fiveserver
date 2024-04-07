@@ -35,7 +35,7 @@ class RegistrationResource(resource.Resource):
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
-        self.cipher = Blowfish.new(binascii.a2b_hex(self.config.cipherKey))
+        self.cipher = Blowfish.new(binascii.a2b_hex(self.config.cipherKey), Blowfish.MODE_ECB)
 
     def render_GET(self, request):
         if request.path == b'/xsl/style.xsl':
