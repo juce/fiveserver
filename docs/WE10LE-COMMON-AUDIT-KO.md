@@ -1,6 +1,6 @@
 # WE10LE 공통 흐름과 PS2 전용 응답 감사
 
-2026-10-31 기준. upstream은 [juce/fiveserver, 83d191f9a541a31615fa5a2e4260941881b318b7](https://github.com/juce/fiveserver/tree/83d191f9a541a31615fa5a2e4260941881b318b7)입니다. 실제 계정 정보나 원격 서비스 변경 없이 클래스 상속·handler 바인딩·합성 패킷 및 한국판 원본 파서를 대조했습니다.
+2026-10-31 코드 감사 기록이며 실기 확인 상태는 2026-11-01 사용자 보고를 반영했습니다. upstream은 [juce/fiveserver, 83d191f9a541a31615fa5a2e4260941881b318b7](https://github.com/juce/fiveserver/tree/83d191f9a541a31615fa5a2e4260941881b318b7)입니다. 실제 계정 정보나 원격 서비스 변경 없이 클래스 상속·handler 바인딩·합성 패킷 및 한국판 원본 파서를 대조했습니다.
 
 ## 공통 모델과 dispatch 유지
 
@@ -48,8 +48,8 @@ Menu의 일부 상속 경로에는 upstream과 같은 57바이트 프로필/31�
 
 ## 검증 구분
 
-Python 회귀158개와 등록 폼 Node 검증이 통과했습니다. 합성 두 사용자의 인증·프로필·설정 업로드·Main/로비·방 생성/참가·준비/팀/게임 설정·경기 시작·점수/시계·퇴장·빈 방 삭제·로그아웃을 실제 production handler/model/wire로 연속 실행했습니다. 공통 방/설정 회귀는 PES6와 WE10LE 양쪽을 검사하며 SQL 경계만 대체합니다.
+2026-10-31 감사 당시 Python 회귀158개와 등록 폼 Node 검증이 통과했습니다. 합성 두 사용자의 인증·프로필·설정 업로드·Main/로비·방 생성/참가·준비/팀/게임 설정·경기 시작·점수/시계·퇴장·빈 방 삭제·로그아웃을 실제 production handler/model/wire로 연속 실행했습니다. 공통 방/설정 회귀는 PES6와 WE10LE 양쪽을 검사하며 SQL 경계만 대체합니다. 현재 전체 검증 결과는 [WE10LE-KR.md](WE10LE-KR.md)를 참고하세요.
 
-사용자는 별도 PNACH 뒤 게임 로그인과 기본 ID 로그인 성공을 확인했습니다. 수정 후 실제 두 PCSX2의 P2P 경기 완료·NAT 판정·최종 경기 기록 DB 저장은 아직 검증하지 않았습니다. 원본 ISO는 수정하지 않았습니다.
+2026-11-01 추가로 사용자가 서로 다른 PC 두 대에서 실제 대전이 동작함을 확인했습니다. 이는 사용자 보고이며 에이전트의 직접 경기 관찰과는 구분합니다. 모든 NAT 환경의 판정·최종 경기 기록 DB 저장·Docker 엔진 실행은 이 보고로 검증된 것이 아닙니다. 원본 ISO는 수정하지 않았습니다.
 
 관련 소스: [PES5 공통 처리](../lib/fiveserver/protocol/pes5.py), [PES6 방·경기](../lib/fiveserver/protocol/pes6.py), [WE10LE adapter](../lib/fiveserver/protocol/we10le.py), [공통 모델](../lib/fiveserver/model/lobby.py).

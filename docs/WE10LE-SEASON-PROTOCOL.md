@@ -142,5 +142,9 @@ final confirmation ordering, fresh recipient nonces, both rematch paths and
 cleanup. Generic club/season cases cover catalog choices beyond Chelsea,
 club-range boundaries, reserved season65535 and incompatible version2.
 The recorded full server run contains 205 passing Python tests. These are server
-protocol tests; two machines still require validation
-of client callbacks, native roster preparation, UDP connectivity and gameplay.
+protocol tests. The user has confirmed gameplay between two separate PCs;
+this is user-reported evidence rather than a directly observed automated match.
+The report did not identify a particular v3 client build or season roster, so
+the optional extension's end-to-end behavior remains unverified. Automated
+tests establish the server-side protocol checks described above. Final database
+statistics and Docker-engine execution also remain unverified.

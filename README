@@ -119,6 +119,10 @@ scope and validation limits. The Korean investigation notes are in
 docs/WE10LE-KR.md. DNAS is an external client prerequisite; no game assets
 or client patches are included.
 
+The user has confirmed gameplay between two separate PCs. This is
+user-reported validation; final database statistics and Docker-engine
+execution have not been independently verified.
+
     ./service.sh we10le run
 
 Use etc/conf/we10le.yaml and sql/schema6.sql in a separate database.

@@ -5,11 +5,12 @@ SLKA-25153**. It adds a separate application and protocol adapter while reusing
 the existing PES6 account, lobby, room and match models. The original Fiveserver
 and Sixserver entry points remain available.
 
-Users have reported reaching login, profile selection, lobbies and rooms with
-PCSX2. A complete match between two different PCs, its UDP/NAT path and final
-database statistics have **not** been verified end to end. Container image
-archive checks are also distinct from running the image in a Docker engine;
-that runtime check remains outstanding.
+The user has confirmed gameplay between two separate PCs, in addition to
+login, profile selection, lobbies and rooms with PCSX2. This is user-reported
+validation, not a directly observed automated gameplay test. Final database
+statistics and Docker-engine execution remain unverified. Container image
+archive checks do not establish those outcomes, and one working setup does not
+validate every UDP/NAT environment.
 
 The repository contains server source, configuration, a registration form and
 tests. It contains no ISO, BIOS, game executable, PNACH, memory-card image or
@@ -125,6 +126,10 @@ season participants cannot start a season match. See the
 [protocol contract](WE10LE-SEASON-PROTOCOL.md) for the exact wire format,
 lifecycle and client-side validation requirements.
 
+The v3 server behavior is covered by automated tests. The user's two-PC
+gameplay report did not identify a particular v3 client build or season roster,
+so it is not an end-to-end validation of this optional extension.
+
 ## Container entry point
 
 The dedicated [Dockerfile](../docker/we10le/Dockerfile) is separate from the
@@ -168,14 +173,14 @@ Deferreds and server models, with database/time boundaries replaced by test
 fixtures. It covers authentication, profile hydration, registration, lobby/room
 flows, shared regressions, container configuration and season negotiation.
 The Node test checks the registration form's pad mapping and credential
-calculation. These checks do not replace a real database deployment or a
-two-PC gameplay test.
+calculation. The user's separate two-PC gameplay confirmation complements
+these tests; the tests themselves do not validate the live database deployment.
 
 Use `TraceProtocol: true` or `WE10LE_PROTOCOL_TRACE=1` for service, packet ID,
 length and authentication-outcome diagnostics without raw authentication
 payloads. Keep `Debug: false` when collecting this trace; the inherited raw
 debug formatter is a separate diagnostic path. Unknown optional fields,
-Korean text handling, less-observed network-menu features and end-to-end
-match/statistics behavior still need client-side validation. Historical packet
+Korean text handling, less-observed network-menu features and final database
+statistics still need further validation. Historical packet
 evidence is in [WE10LE-KR.md](WE10LE-KR.md); shared-flow review is in
 [WE10LE-COMMON-AUDIT-KO.md](WE10LE-COMMON-AUDIT-KO.md).
