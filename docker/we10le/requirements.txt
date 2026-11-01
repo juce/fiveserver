@@ -1,0 +1,8 @@
+# Dedicated Linux container: use the DB-API compatible pure-Python MySQL driver.
+PyMySQL==1.1.2
+PyYAML==6.0.3
+Twisted==26.4.0
+pyOpenSSL==26.4.0
+pycryptodome==4.2.0
+zope.interface==8.7
+service-identity==26.1.0

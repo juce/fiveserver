@@ -1,0 +1,9 @@
+# Dedicated experimental PS2 service, tested with Python 3.12.
+# The original PC service requirements are unchanged.
+mysqlclient==2.3.0
+PyYAML==6.0.3
+Twisted==26.4.0
+pyOpenSSL==26.4.0
+pycryptodome==4.2.0
+zope.interface==8.7
+service-identity==26.1.0

@@ -13,7 +13,10 @@ XML_HEADER = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-def getFormContent(webDir):
+def getFormContent(webDir, formFile=None):
+    if formFile is not None:
+        with open('%s/%s' % (webDir, formFile), encoding='utf-8') as f:
+            return f.read()
     try:
         f = open('%s/form.html' % webDir)
     except IOError:
@@ -31,10 +34,11 @@ def getResultContent(webDir):
 
 class RegistrationResource(resource.Resource):
     isLeaf = True
-    def __init__(self, config, webDir):
+    def __init__(self, config, webDir, formFile=None):
         self.xsl = open('%s/style.xsl' % webDir).read()
         self.config = config
         self.webDir = webDir
+        self.formFile = formFile
         self.cipher = Blowfish.new(binascii.a2b_hex(self.config.cipherKey), Blowfish.MODE_ECB)
 
     def render_GET(self, request):
@@ -48,7 +52,7 @@ class RegistrationResource(resource.Resource):
                 else:
                     usr = results[0]
                     username,nonce,serial = usr.username,usr.nonce,usr.serial
-                s = getFormContent(self.webDir)
+                s = getFormContent(self.webDir, self.formFile)
                 s = s % {'username':username,
                          'nonce':nonce,
                          'serial':serial}
@@ -65,14 +69,14 @@ class RegistrationResource(resource.Resource):
             return open('%s/md5.js' % self.webDir).read().encode('utf-8')
         else:
             request.setHeader('Content-Type','text/html')
-            s = getFormContent(self.webDir)
+            s = getFormContent(self.webDir, self.formFile)
             s = s % {'username':'','nonce':'','serial':''}
             return s.encode('utf-8')
  
     def sendHtmlResponse(self, request, message):
         request.setHeader('Content-Type','text/html')
         s = getResultContent(self.webDir)
-        s = s.decode('utf-8') % {'result': message}
+        s = s % {'result': message}
         return s.encode('utf-8')
 
     def sendXmlResponse(self, request, message):

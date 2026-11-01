@@ -1,0 +1,66 @@
+Name: WE10 Liveware Evolution Korea (experimental)
+Version: 1.0
+
+# Set this to the server's reachable IPv4 before connecting a PS2/PCSX2.
+ServerIP: 127.0.0.1
+ListenOn: ""
+
+# username checks the account ID; password also checks the game password.
+AuthMode: username
+
+# The disc hardcodes TCP 10881. Cannot share this IP/port with Sixserver.
+GamePorts:
+    we10le: 10881
+
+NetworkServer:
+    mainService: 20210
+    networkMenuService: 20211
+    loginService:
+        we10le: 20212
+
+WebInterface:
+    port: 8195
+
+Lobbies:
+    - name: Korea
+      type: open
+      checkRosterHash: false
+    - name: Training
+      type: noStats
+      checkRosterHash: false
+
+Debug: false
+
+DB:
+    name: we10le
+    user: we10le
+    password: change-me
+    readServers: [127.0.0.1]
+    writeServers: [127.0.0.1]
+    sharePool: true
+    ConnectionPool:
+        minConnections: 3
+        maxConnections: 5
+        keepAliveInterval: 60
+
+BannedList: ./etc/data/banned-we10le.yaml
+Chat:
+    bannedWords: []
+    warningMessage: message was removed
+
+# PS2 does not supply the PC roster checksum.
+Roster:
+    enforceHash: false
+    compareHash: false
+
+ComputeRanksInterval:
+    days: 1
+    seconds: 0
+
+StoreSettings: false
+ShowStats: true
+ServerName: WE10LE Korea
+
+Disconnects:
+    CountAsLoss:
+        Enabled: false
