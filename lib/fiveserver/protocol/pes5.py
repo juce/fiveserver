@@ -442,7 +442,7 @@ class LoginService(PacketDispatcher):
         defer.returnValue(None)
 
     def do_3088(self, pkt):
-        if pkt.data[2] == b'\3':
+        if pkt.data[2] == 3:
             # update settings
             settings1 = zlib.compress(pkt.data)
             self._user.profile.settings.settings1 = settings1

@@ -668,6 +668,7 @@ class MainService(RosterHandler, pes5.MainService):
         if room is None:
             log.msg('ERROR: Room (id=%d) does not exist.' % roomId)
             self.sendData(0x4321,b'\0\0\0\1')
+            return
         else:
             if room.usePassword:
                 enteredPassword = util.stripZeros(pkt.data[4:19])
@@ -675,6 +676,7 @@ class MainService(RosterHandler, pes5.MainService):
                     log.msg(
                         'ERROR: Room (id=%d) password does not match.' % roomId)
                     self.sendData(0x4321,b'\xff\xff\xfd\xda')
+                    return
                 else:
                     room.enter(self._user)
             else:
@@ -683,8 +685,8 @@ class MainService(RosterHandler, pes5.MainService):
             self.sendRoomUpdate(room)
             self.sendPlayerUpdate(room.id)
             data = b'\0\0\0\0'
-            if room.matchSettings:
-                data += room.matchSettings.match_time
+            match_time = room.matchSettings.match_time if room.matchSettings else 0
+            data += struct.pack('!B', match_time)
             self.sendData(0x4321, data)
         # give players in room stun of joiner
         # special 4330 packet
@@ -725,7 +727,7 @@ class MainService(RosterHandler, pes5.MainService):
         room.exit(usr)
         
         self.sendRoomUpdate(room)
-        self.sendPlayerUpdate(room.id)
+        self.sendPlayerUpdate(0)
         self.sendZeros(0x432b,4)
 
         # destroy the room, if none left in it

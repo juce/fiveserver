@@ -21,8 +21,14 @@ case "$1" in
         LOG=${fsroot}/log/sixserver.log
         PID=${fsroot}/log/sixserver.pid
         ;;
+    we10le)
+        PROG=we10le
+        TAC=${fsroot}/tac/we10le.tac
+        LOG=${fsroot}/log/we10le.log
+        PID=${fsroot}/log/we10le.pid
+        ;;
     *)
-        echo "Usage $0 {fiveserver|sixserver} {run|start|stop|status}"
+        echo "Usage $0 {fiveserver|sixserver|we10le} {run|start|stop|status}"
         RETVAL=3
         exit $RETVAL
 esac
@@ -55,7 +61,7 @@ case "$2" in
         fi
         ;;
     *)
-        echo "Usage $0 {fiveserver|sixserver} {run|start|stop|status}"
+        echo "Usage $0 {fiveserver|sixserver|we10le} {run|start|stop|status}"
         RETVAL=3
 esac
 

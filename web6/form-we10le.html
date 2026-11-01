@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WE10 Liveware Evolution · 계정 등록</title>
+<style>
+body { margin: 2rem auto; padding: 0 1rem; max-width: 34rem; font-family: sans-serif; line-height: 1.6; }
+h1 { font-size: 1.5rem; line-height: 1.3; }
+label { display: block; margin-top: 1.25rem; font-weight: bold; }
+input[type="text"], input[type="password"] { display: block; box-sizing: border-box; width: 24rem; max-width: calc(100vw - 2rem); padding: .65rem; font-size: 1rem; }
+small { display: block; color: #444; }
+button { margin-top: 1.5rem; padding: .65rem 1rem; font-size: 1rem; cursor: pointer; }
+#error { color: #a31818; }
+fieldset { margin-top: 1rem; padding: .75rem; border: 1px solid #aaa; }
+.pad-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .4rem; }
+.pad-grid button, .pad-actions button { margin-top: 0; padding: .55rem .25rem; }
+.pad-actions { display: flex; gap: .5rem; margin-top: .6rem; }
+</style>
+<script src="/md5.js"></script>
+<script>
+"use strict";
+const PAD_PASSWORD_BUTTONS = Object.freeze({
+    up: 'A', down: 'B', left: 'C', right: 'D',
+    l1: 'E', l2: 'F', r1: 'G', r2: 'H',
+    circle: 'I', cross: 'J', triangle: 'K', square: 'L'
+});
+function updatePasswordStatus() {
+    const field = document.getElementById('password');
+    document.getElementById('password-status').textContent = field.value.length + ' / 31';
+    document.getElementById('hash').value = '';
+    document.getElementById('error').textContent = '';
+}
+function appendPadPassword(button) {
+    if (!Object.prototype.hasOwnProperty.call(PAD_PASSWORD_BUTTONS, button)) { return false; }
+    const field = document.getElementById('password');
+    if (field.value.length >= 31) {
+        document.getElementById('error').textContent = '비밀번호는 최대 31자입니다. Maximum 31 characters.';
+        return false;
+    }
+    field.value += PAD_PASSWORD_BUTTONS[button];
+    updatePasswordStatus();
+    field.focus();
+    return true;
+}
+function deletePasswordCharacter() {
+    const field = document.getElementById('password');
+    field.value = field.value.slice(0, -1);
+    updatePasswordStatus();
+    field.focus();
+}
+function clearPassword() {
+    document.getElementById('password').value = '';
+    updatePasswordStatus();
+    document.getElementById('password').focus();
+}
+function makeHash() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    const error = document.getElementById('error');
+    error.textContent = '';
+    document.getElementById('hash').value = '';
+    if (!/^[A-Za-z0-9]{3,31}$/.test(username)) {
+        error.textContent = '아이디는 영문·숫자 3–31자입니다. Use 3–31 ASCII letters or digits.';
+        document.getElementById('username').focus();
+        return false;
+    }
+    if (!/^[A-L]{1,31}$/.test(password)) {
+        error.textContent = '비밀번호는 대문자 A–L만 1–31자입니다. Use 1–31 uppercase letters A–L for the game pad buttons.';
+        document.getElementById('password').focus();
+        return false;
+    }
+    if (typeof hex_md5 !== 'function') {
+        error.textContent = '등록 도구를 불러오지 못했습니다. 새로고침하세요. Reload this page to try again.';
+        return false;
+    }
+    document.getElementById('hash').value = hex_md5(username + '\0'.repeat(16) + password);
+    return true;
+}
+</script>
+</head>
+<body>
+<h1>Winning Eleven 10<br>Liveware Evolution</h1>
+<p>한국판 PS2 · SLKA-25153<br>Korean edition · Account registration</p>
+<form name="registration" action="/register" method="post" onsubmit="return makeHash();">
+<input type="hidden" name="serial" value="SLKA-25153">
+<input type="hidden" name="nonce" value="%(nonce)s">
+<input type="hidden" name="hash" id="hash" value="">
+<input type="hidden" name="format" value="html">
+<label for="username">아이디 / Username</label>
+<input type="text" name="user" id="username" value="%(username)s" minlength="3" maxlength="31" pattern="[A-Za-z0-9]{3,31}" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+<small>영문·숫자 3–31자 / 3–31 ASCII letters or digits</small>
+<label for="password">비밀번호 / Password</label>
+<input type="password" id="password" minlength="1" maxlength="31" pattern="[A-L]{1,31}" title="대문자 A–L만 1–31자 / 1–31 uppercase letters A–L" autocomplete="new-password" autocapitalize="none" spellcheck="false" aria-describedby="password-help password-status" oninput="updatePasswordStatus();" required>
+<small id="password-help">게임 비밀번호는 키보드 대신 패드 버튼으로 입력합니다. 아래 버튼을 누르거나 대문자 A–L을 직접 입력하세요. 1–31자이며 자동 대문자 변환은 하지 않습니다.<br>Use the pad buttons below or type uppercase A–L, 1–31 characters.</small>
+<small id="password-status" aria-live="polite">0 / 31</small>
+<fieldset>
+<legend>게임 패드 비밀번호 / Game pad password</legend>
+<div class="pad-grid">
+<button type="button" onclick="appendPadPassword('up');">↑ · A</button>
+<button type="button" onclick="appendPadPassword('down');">↓ · B</button>
+<button type="button" onclick="appendPadPassword('left');">← · C</button>
+<button type="button" onclick="appendPadPassword('right');">→ · D</button>
+<button type="button" onclick="appendPadPassword('l1');">L1 · E</button>
+<button type="button" onclick="appendPadPassword('l2');">L2 · F</button>
+<button type="button" onclick="appendPadPassword('r1');">R1 · G</button>
+<button type="button" onclick="appendPadPassword('r2');">R2 · H</button>
+<button type="button" onclick="appendPadPassword('circle');">○ · I</button>
+<button type="button" onclick="appendPadPassword('cross');">× · J</button>
+<button type="button" onclick="appendPadPassword('triangle');">△ · K</button>
+<button type="button" onclick="appendPadPassword('square');">□ · L</button>
+</div>
+<div class="pad-actions">
+<button type="button" onclick="deletePasswordCharacter();">한 글자 삭제 / Delete</button>
+<button type="button" onclick="clearPassword();">전체 지움 / Clear</button>
+</div>
+<small>게임에서는 같은 버튼 순서로 입력한 뒤 Start로 완료합니다. Select는 한 글자 삭제입니다.<br>Repeat the same sequence in the game; Start finishes and Select deletes.</small>
+</fieldset>
+<p id="error" role="alert" aria-live="polite"></p>
+<button type="submit">등록 / Register</button>
+</form>
+<p>게임에는 같은 아이디와 패드 버튼 순서를 입력하세요.<br>Use the same username and pad button sequence in the game.</p>
+<noscript>등록하려면 JavaScript를 활성화하세요. Enable JavaScript to register.</noscript>
+</body>
+</html>

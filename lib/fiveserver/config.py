@@ -415,15 +415,29 @@ class FiveServerConfig:
         users = yield self.userData.findByHash(hash)
         if not users:
             raise errors.UnknownUserError('Unknown user: %s' % hash)
-        profiles = yield self.profileData.getByUserId(users[0].id)
-        users[0].profiles = [None, None, None]
+        return (yield self._hydrateUserProfiles(users[0]))
+
+    @defer.inlineCallbacks
+    def getUserByUsername(self, username):
+        users = yield self.userData.findByUsername(username)
+        # Database collations may compare names without regard to case. Keep
+        # the existing account's exact spelling as the login identifier.
+        account = next((usr for usr in users if usr.username == username), None)
+        if account is None:
+            raise errors.UnknownUserError('Unknown user.')
+        return (yield self._hydrateUserProfiles(account))
+
+    @defer.inlineCallbacks
+    def _hydrateUserProfiles(self, account):
+        profiles = yield self.profileData.getByUserId(account.id)
+        account.profiles = [None, None, None]
         for profile in profiles:
-            users[0].profiles[profile.index] = profile
+            account.profiles[profile.index] = profile
         for i in range(3):
-            if users[0].profiles[i] is None:
-                users[0].profiles[i] = user.Profile(i)
-                users[0].profiles[i].userId = users[0].id
-        defer.returnValue(users[0])
+            if account.profiles[i] is None:
+                account.profiles[i] = user.Profile(i)
+                account.profiles[i].userId = account.id
+        return account
 
     def getLobbies(self):
         return self.lobbies

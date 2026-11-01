@@ -115,7 +115,7 @@ class Lobby:
         return None
         
     def isRoom(self, name):
-        return self.rooms.has_key(name)
+        return name in self.rooms
 
     def enter(self, usr, lobbyConnection):
         usr.lobbyConnection = lobbyConnection

@@ -107,3 +107,27 @@ all available options:
 For example, to start fiveserver service, you would do:
 
     ./service.sh fiveserver start
+
+
+EXPERIMENTAL KOREAN PS2 WE10 LIVEWARE EVOLUTION
+==============================================
+
+Support for the SLKA-25153 disc is available as a separate experimental
+service. See the [English maintainer and setup guide](docs/WE10LE.md) for
+configuration, the default username-only authentication policy, protocol
+scope and validation limits. The Korean investigation notes are in
+docs/WE10LE-KR.md. DNAS is an external client prerequisite; no game assets
+or client patches are included.
+
+    ./service.sh we10le run
+
+Use etc/conf/we10le.yaml and sql/schema6.sql in a separate database.
+This service and Sixserver both use TCP 10881; run one per listening IP.
+
+Docker packaging for the Korean service:
+  docker/we10le/Dockerfile
+  docker/we10le/entrypoint.py
+
+The container uses a DB-API compatible PyMySQL adapter and environment-based
+configuration. It runs separately from the official MariaDB container.
+WE10LE_CONFIG optionally selects a runtime YAML file for tac/we10le.tac.
