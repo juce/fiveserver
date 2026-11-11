@@ -9,13 +9,12 @@ from twisted.application.internet import TCPServer
 from twisted.application.service import Application
 from twisted.web.server import Site
 from twisted.web import static
-from twisted.web.resource import Resource
 from twisted.internet import reactor
 
 from fiveserver.config import FiveServerConfig, YamlConfig, DatabaseConfig
 from fiveserver.protocol import PacketServiceFactory
 from fiveserver.protocol import pes5, pes6
-from fiveserver.register import RegistrationResource
+from fiveserver.register import RegistrationResource, IconRootResource
 from fiveserver import storagecontroller, log
 from fiveserver import admin, data, logic
 import os
@@ -69,21 +68,8 @@ for protocol,port in [
     service.setServiceParent(application)
 
 # registration web-service
-class FaviconRegistrationRoot(Resource):
-    def __init__(self, original_resource):
-        Resource.__init__(self)
-        self.original_resource = original_resource
-
-    def getChild(self, path, request):
-        if path == b'favicon.ico':
-            return FAVICON
-        elif path in (b'apple-touch-icon.png', b'apple-touch-icon-precomposed.png'):
-            return APPLE_ICON
-        request.postpath.insert(0, path)
-        return self.original_resource
-
 regRoot = RegistrationResource(config, fsroot + '/web')
-registrationServer = Site(FaviconRegistrationRoot(regRoot))
+registrationServer = Site(IconRootResource(regRoot, FAVICON, APPLE_ICON))
 service = TCPServer(scfg.WebInterface['port'], registrationServer, interface=config.interface)
 service.setServiceParent(application)
 
