@@ -442,7 +442,9 @@ class LoginService(PacketDispatcher):
         defer.returnValue(None)
 
     def do_3088(self, pkt):
-        if pkt.data[2] == b'\3':
+        # When accessing one specific element of a bytes string in Python3,
+        # you get a number instead of a bytes object. So we need to check for the value 3 instead of b'\x03'.
+        if pkt.data[2] == 3:
             # update settings
             settings1 = zlib.compress(pkt.data)
             self._user.profile.settings.settings1 = settings1
