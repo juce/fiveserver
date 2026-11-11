@@ -15,7 +15,7 @@
    <xsl:template match="/">
       <HTML>
          <HEAD>
-            <!-- Apple und Standard Favicons -->
+            <!-- favicon and apple-touch-icon (optional, see README) -->
             <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
             <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
             <STYLE>
