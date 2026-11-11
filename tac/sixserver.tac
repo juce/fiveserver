@@ -1,3 +1,4 @@
+# try to use epoll reactor if available
 try:
     from twisted.internet import epollreactor
     epollreactor.install()
@@ -75,7 +76,7 @@ class FaviconRegistrationRoot(Resource):
     def getChild(self, path, request):
         if path == b'favicon.ico':
             return FAVICON
-        elif path == b'apple-touch-icon.png':
+        elif path in (b'apple-touch-icon.png', b'apple-touch-icon-precomposed.png'):
             return APPLE_ICON
         request.postpath.insert(0, path)
         return self.original_resource
@@ -105,6 +106,7 @@ adminRoot.putChild(b'home', adminRoot)
 adminRoot.putChild(b'xsl', admin.XslResource(adminConfig))
 adminRoot.putChild(b'favicon.ico', FAVICON)
 adminRoot.putChild(b'apple-touch-icon.png', APPLE_ICON)
+adminRoot.putChild(b'apple-touch-icon-precomposed.png', APPLE_ICON)
 adminRoot.putChild(b'log', admin.LogResource(adminConfig, config))
 adminRoot.putChild(b'biglog', admin.LogResource(adminConfig, config))
 usersResource = admin.UsersResource(adminConfig, config)
@@ -139,6 +141,7 @@ statsRoot.putChild(b'home', statsRoot)
 statsRoot.putChild(b'xsl', admin.XslResource(adminConfig))
 statsRoot.putChild(b'favicon.ico', FAVICON)
 statsRoot.putChild(b'apple-touch-icon.png', APPLE_ICON)
+statsRoot.putChild(b'apple-touch-icon-precomposed.png', APPLE_ICON)
 usersResource = admin.UsersResource(adminConfig, config, False)
 statsRoot.putChild(b'users', usersResource)
 usersResource.putChild(
