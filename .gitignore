@@ -2,3 +2,9 @@ __pycache__
 .local/*
 *.log
 etc/data/*.yaml
+
+# optional browser icons, provided by the server operator (see README)
+web/favicon.ico
+web/apple-touch-icon.png
+web6/favicon.ico
+web6/apple-touch-icon.png
