@@ -29,6 +29,29 @@ def getResultContent(webDir):
     return f.read()
 
 
+class IconRootResource(resource.Resource):
+    """
+    Root resource for the registration web-service. Serves the optional
+    favicon and apple-touch-icon and passes every other request on to
+    the wrapped resource (RegistrationResource is a leaf resource, so the
+    icons cannot be added to it with putChild).
+    """
+    def __init__(self, original, favicon, appleTouchIcon):
+        resource.Resource.__init__(self)
+        self.original = original
+        self.favicon = favicon
+        self.appleTouchIcon = appleTouchIcon
+
+    def getChild(self, path, request):
+        if path == b'favicon.ico':
+            return self.favicon
+        if path in (b'apple-touch-icon.png',
+                    b'apple-touch-icon-precomposed.png'):
+            return self.appleTouchIcon
+        request.postpath.insert(0, path)
+        return self.original
+
+
 class RegistrationResource(resource.Resource):
     isLeaf = True
     def __init__(self, config, webDir):

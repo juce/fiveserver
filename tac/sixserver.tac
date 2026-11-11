@@ -8,12 +8,13 @@ except:
 from twisted.application.internet import TCPServer
 from twisted.application.service import Application
 from twisted.web.server import Site
+from twisted.web import static
 from twisted.internet import reactor
 
 from fiveserver.config import FiveServerConfig, YamlConfig, DatabaseConfig
 from fiveserver.protocol import PacketServiceFactory
 from fiveserver.protocol import pes5, pes6
-from fiveserver.register import RegistrationResource
+from fiveserver.register import RegistrationResource, IconRootResource
 from fiveserver import storagecontroller, log
 from fiveserver import admin, data6, logic
 import os
@@ -21,6 +22,9 @@ import os
 
 application = Application("Sixserver application")
 fsroot = os.environ.get('FSROOT','.')
+
+FAVICON = static.File(os.path.join(fsroot, 'web6', 'favicon.ico'), defaultType="image/x-icon")
+APPLE_ICON = static.File(os.path.join(fsroot, 'web6', 'apple-touch-icon.png'), defaultType="image/png")
 
 scfg = YamlConfig(fsroot + '/etc/conf/sixserver.yaml')
 log.setDebug(scfg.Debug)
@@ -63,8 +67,8 @@ for protocol,port in [
     service.setServiceParent(application)
 
 # registration web-service
-registrationServer = Site(
-    RegistrationResource(config,fsroot + '/web6'))
+regRoot = RegistrationResource(config, fsroot + '/web6')
+registrationServer = Site(IconRootResource(regRoot, FAVICON, APPLE_ICON))
 service = TCPServer(scfg.WebInterface['port'], registrationServer, 
     interface=config.interface)
 service.setServiceParent(application)
@@ -86,6 +90,9 @@ adminRoot = admin.AdminRootResource(adminConfig, config)
 adminRoot.putChild(b'', adminRoot)
 adminRoot.putChild(b'home', adminRoot)
 adminRoot.putChild(b'xsl', admin.XslResource(adminConfig))
+adminRoot.putChild(b'favicon.ico', FAVICON)
+adminRoot.putChild(b'apple-touch-icon.png', APPLE_ICON)
+adminRoot.putChild(b'apple-touch-icon-precomposed.png', APPLE_ICON)
 adminRoot.putChild(b'log', admin.LogResource(adminConfig, config))
 adminRoot.putChild(b'biglog', admin.LogResource(adminConfig, config))
 usersResource = admin.UsersResource(adminConfig, config)
@@ -118,6 +125,9 @@ statsRoot = admin.StatsRootResource(adminConfig, config, False)
 statsRoot.putChild(b'', statsRoot)
 statsRoot.putChild(b'home', statsRoot)
 statsRoot.putChild(b'xsl', admin.XslResource(adminConfig))
+statsRoot.putChild(b'favicon.ico', FAVICON)
+statsRoot.putChild(b'apple-touch-icon.png', APPLE_ICON)
+statsRoot.putChild(b'apple-touch-icon-precomposed.png', APPLE_ICON)
 usersResource = admin.UsersResource(adminConfig, config, False)
 statsRoot.putChild(b'users', usersResource)
 usersResource.putChild(
@@ -130,4 +140,3 @@ statsServer = Site(statsRoot)
 statsService = TCPServer(adminConfig.AdminPort+1, statsServer, 
     interface='127.0.0.1') # restrict to localhost requests only
 statsService.setServiceParent(application)
-

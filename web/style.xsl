@@ -15,6 +15,9 @@
    <xsl:template match="/">
       <HTML>
          <HEAD>
+            <!-- favicon and apple-touch-icon (optional, see README) -->
+            <link rel="apple-touch-icon" href="/apple-touch-icon.png"/>
+            <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
             <STYLE>
               BODY  {font:0.96em 'Arial'; margin-right:1.5em}
                 .b  {color:red; font-family:'Courier New'; font-weight:normal;

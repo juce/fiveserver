@@ -107,3 +107,21 @@ all available options:
 For example, to start fiveserver service, you would do:
 
     ./service.sh fiveserver start
+
+
+
+BROWSER ICONS (OPTIONAL)
+========================
+
+
+The registration, admin and stats web pages can show a favicon and an
+apple-touch-icon (used by iOS when a page is added to the home screen).
+The icon files are not part of this repository. Place your own files here:
+
+    web/favicon.ico              (fiveserver)
+    web/apple-touch-icon.png     (fiveserver, 180x180 recommended)
+    web6/favicon.ico             (sixserver)
+    web6/apple-touch-icon.png    (sixserver, 180x180 recommended)
+
+Restart the service after adding them. If a file is missing, requests for it
+simply return 404, as before. Nothing else is affected.
